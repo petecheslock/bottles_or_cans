@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Admin Dashboard</h1>
+
+    <div class="row justify-content-center g-4">
+        <!-- Add Review Card -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('add_review') }}" class="text-decoration-none">
+                <div class="card h-100 hover-card">
+                    <div class="card-body text-center p-5">
+                        <div class="display-4 mb-3 text-primary">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <h3>Add Review</h3>
+                        <p class="text-muted">Create new reviews for the game</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Manage Reviews Card -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('manage_reviews') }}" class="text-decoration-none">
+                <div class="card h-100 hover-card">
+                    <div class="card-body text-center p-5">
+                        <div class="display-4 mb-3 text-success">
+                            <i class="bi bi-gear"></i>
+                        </div>
+                        <h3>Manage Reviews</h3>
+                        <p class="text-muted">Edit or delete existing reviews</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Pending Reviews Card -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('pending_reviews') }}" class="text-decoration-none">
+                <div class="card h-100 hover-card">
+                    <div class="card-body text-center p-5">
+                        <div class="display-4 mb-3 text-warning">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <h3>Pending Reviews</h3>
+                        <p class="text-muted">Moderate user-submitted reviews</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- User Management Card -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('manage_users') }}" class="text-decoration-none">
+                <div class="card h-100 hover-card">
+                    <div class="card-body text-center p-5">
+                        <div class="display-4 mb-3 text-info">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h3>User Management</h3>
+                        <p class="text-muted">Manage admin users and passwords</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+}
+
+.hover-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 15px rgba(0,0,0,.2);
+}
+
+.card h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.display-4 i {
+    font-size: 4rem;
+}
+</style>
+{% endblock %} 

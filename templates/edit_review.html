@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Edit Review</h1>
+    
+    <form method="POST">
+        <div class="mb-3">
+            <label for="review_text" class="form-label">Review Text</label>
+            <textarea 
+                class="form-control" 
+                id="review_text" 
+                name="review_text" 
+                rows="5" 
+                required
+            >{{ review.text }}</textarea>
+        </div>
+        
+        <div class="mb-3">
+            <p class="text-muted">
+                Current Votes: 
+                Headphones ({{ review.votes_headphones }}) | 
+                Wine ({{ review.votes_wine }})
+            </p>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Update Review</button>
+        <a href="{{ url_for('manage_reviews') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %} 

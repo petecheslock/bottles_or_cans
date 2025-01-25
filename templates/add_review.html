@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Add New Review</h1>
+    <p class="lead">Add an ambiguous review that could be either about headphones or wine!</p>
+        
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST">
+        <div class="mb-3">
+            <label for="review_text" class="form-label">Review Text</label>
+            <textarea 
+                class="form-control" 
+                id="review_text" 
+                name="review_text" 
+                rows="5" 
+                placeholder="Example: The bass is rich and full-bodied with excellent depth..." 
+                required
+                autofocus
+            ></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Submit Review</button>
+    </form>
+</div>
+{% endblock %} 

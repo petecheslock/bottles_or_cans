@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Pending Reviews</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if pending_reviews %}
+        {% for review in pending_reviews %}
+            <div class="card mb-3 animate__animated animate__fadeIn">
+                <div class="card-body">
+                    <p class="review-text">{{ review.text }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="text-muted small mb-0">
+                            Submitted: {{ review.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                            {% if review.ip_address %}
+                                <br>IP: {{ review.ip_address }}
+                            {% endif %}
+                        </p>
+                        <div class="d-flex gap-2">
+                            <form action="{{ url_for('review_action', review_id=review.id, action='approve') }}" 
+                                  method="POST" 
+                                  style="display: inline;">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle me-2"></i>Approve
+                                </button>
+                            </form>
+                            <form action="{{ url_for('review_action', review_id=review.id, action='reject') }}" 
+                                  method="POST" 
+                                  style="display: inline;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-x-circle me-2"></i>Reject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>No pending reviews to moderate.
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

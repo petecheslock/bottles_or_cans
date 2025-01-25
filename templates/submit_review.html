@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="text-center mb-4">Submit Your Review</h1>
+                    
+                    <p class="lead text-center mb-4">
+                        Write an ambiguous review that could be interpreted as either about headphones or wine!
+                    </p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" onsubmit="return validateForm(event)">
+                        <div class="mb-4">
+                            <label for="review_text" class="form-label">Your Review</label>
+                            <textarea 
+                                class="form-control" 
+                                id="review_text" 
+                                name="review_text" 
+                                rows="5" 
+                                placeholder="Example: The bass is rich and full-bodied with excellent depth..." 
+                                required
+                                maxlength="500"
+                            ></textarea>
+                            <div class="form-text">
+                                Try to make it ambiguous - the best reviews could be about either bottles or cans!
+                            </div>
+                        </div>
+
+                        <!-- CAPTCHA Section -->
+                        <div class="mb-4">
+                            <label class="form-label">Verify you're human</label>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <p class="mb-2">Please solve this math problem:</p>
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <span class="fw-bold">{{ captcha_question }}</span>
+                                        </div>
+                                        <div class="col">
+                                            <input type="number" 
+                                                   class="form-control" 
+                                                   name="captcha_answer" 
+                                                   id="captcha_answer"
+                                                   required 
+                                                   placeholder="Enter your answer">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </div>
+                    </form>
+                    <script>
+                    function validateForm(event) {
+                        const reviewText = document.getElementById('review_text').value;
+                        const captchaAnswer = document.getElementById('captcha_answer').value;
+                        
+                        if (!reviewText || !captchaAnswer) {
+                            event.preventDefault();
+                            return false;
+                        }
+                        return true;
+                    }
+
+                    // Prevent enter key from submitting form in captcha field
+                    document.getElementById('captcha_answer').addEventListener('keypress', function(event) {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            // Only submit if both fields are filled
+                            if (validateForm(event)) {
+                                this.form.submit();
+                            }
+                        }
+                    });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

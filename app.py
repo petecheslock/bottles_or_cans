@@ -237,20 +237,33 @@ def generate_captcha():
 
 # Update the rate limiting helper function to check for admin status
 def check_rate_limit(ip_address, limit_minutes=30):
-    # First check if user is logged in and is admin
     if session.get('logged_in') and session.get('user_id'):
         user = User.query.get(session.get('user_id'))
         if user and user.is_admin:
-            return True  # Admins bypass rate limiting
+            return True
+
+    rate_limit = RateLimit.query.filter_by(ip_address=ip_address).first()
     
-    # For non-admin users, check submission rate
-    cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=limit_minutes)
-    recent_submissions = PendingReview.query.filter(
-        PendingReview.ip_address == ip_address,
-        PendingReview.created_at >= cutoff_time
-    ).count()
+    if not rate_limit:
+        rate_limit = RateLimit(ip_address=ip_address)
+        db.session.add(rate_limit)
+    else:
+        if rate_limit.is_blocked:
+            return False
+            
+        if rate_limit.is_rate_limited():
+            rate_limit.attempt_count += 1
+            if rate_limit.attempt_count >= 5:
+                rate_limit.is_blocked = True
+                db.session.commit()
+                return False
+        else:
+            # Reset counter if outside time window
+            rate_limit.attempt_count = 1
+            rate_limit.last_attempt = datetime.now(timezone.utc)
     
-    return recent_submissions < 5
+    db.session.commit()
+    return rate_limit.attempt_count < 5
 
 @app.route('/submit-review', methods=['GET', 'POST'])
 def submit_review():
@@ -375,7 +388,50 @@ def change_password():
     
     return redirect(url_for('manage_users'))
 
+# Add this new model class
+class RateLimit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip_address = db.Column(db.String(45), nullable=False)
+    last_attempt = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    attempt_count = db.Column(db.Integer, default=1)
+    is_blocked = db.Column(db.Boolean, default=False)
+
+    def is_rate_limited(self):
+        # Ensure last_attempt is timezone-aware
+        if self.last_attempt.tzinfo is None:
+            last_attempt_utc = self.last_attempt.replace(tzinfo=timezone.utc)
+        else:
+            last_attempt_utc = self.last_attempt
+            
+        time_diff = datetime.now(timezone.utc) - last_attempt_utc
+        return time_diff.total_seconds() < (30 * 60)  # 30 minutes
+
+@app.route('/admin/rate-limits', methods=['GET', 'POST'])
+@login_required
+def manage_rate_limits():
+    if request.method == 'POST':
+        ip_address = request.form.get('ip_address')
+        action = request.form.get('action')
+        
+        rate_limit = RateLimit.query.filter_by(ip_address=ip_address).first()
+        if rate_limit:
+            if action == 'unblock':
+                rate_limit.is_blocked = False
+                rate_limit.attempt_count = 0
+                flash('IP address unblocked successfully.', 'success')
+            elif action == 'block':
+                rate_limit.is_blocked = True
+                flash('IP address blocked successfully.', 'success')
+            elif action == 'delete':
+                db.session.delete(rate_limit)
+                flash('Rate limit record deleted successfully.', 'success')
+            
+            db.session.commit()
+    
+    rate_limits = RateLimit.query.order_by(RateLimit.last_attempt.desc()).all()
+    return render_template('rate_limits.html', rate_limits=rate_limits)
+
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        db.create_all()  # This creates all tables that don't exist yet
     app.run(debug=True) 

@@ -26,8 +26,8 @@ You can install the required Python packages using pip. It is recommended to use
 
 2. **Create a Virtual Environment**
    ```bash
-   python -m venv venv
-   source venv/bin/activate
+   python -m venv .venv
+   source .venv/bin/activate
    ```
 
 3. **Install Requirements**

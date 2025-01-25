@@ -1,43 +1,39 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-center mb-0">Admin Login</h2>
-                </div>
-                <div class="card-body">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                    
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="container mx-auto px-4 mt-12">
+   <div class="max-w-md mx-auto">
+       <div class="bg-white rounded-xl shadow-md">
+           <div class="bg-gray-50 p-4 rounded-t-xl border-b">
+               <h2 class="text-2xl font-bold text-center">Admin Login</h2>
+           </div>
+           <div class="p-6">
+               {% with messages = get_flashed_messages(with_categories=true) %}
+                   {% if messages %}
+                       {% for category, message in messages %}
+                           <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} flex justify-between items-center">
+                               {{ message }}
+                               <button type="button" class="text-lg font-semibold" onclick="this.parentElement.remove()">×</button>
+                           </div>
+                       {% endfor %}
+                   {% endif %}
+               {% endwith %}
+               
+               <form method="POST">
+                   <div class="mb-4">
+                       <label for="username" class="block text-gray-700 font-medium mb-2">Username</label>
+                       <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="username" name="username" required>
+                   </div>
+                   
+                   <div class="mb-6">
+                       <label for="password" class="block text-gray-700 font-medium mb-2">Password</label>
+                       <input type="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="password" name="password" required>
+                   </div>
+                   
+                   <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:-translate-y-0.5 transition-all duration-300">Login</button>
+               </form>
+           </div>
+       </div>
+   </div>
 </div>
-{% endblock %} 
+{% endblock %}

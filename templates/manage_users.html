@@ -1,63 +1,65 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4">User Management</h1>
+<div class="container mx-auto px-4 mt-12">
+   <h1 class="text-3xl font-bold mb-8">User Management</h1>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+   {% with messages = get_flashed_messages(with_categories=true) %}
+       {% if messages %}
+           {% for category, message in messages %}
+               <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} flex justify-between items-center">
+                   {{ message }}
+                   <button type="button" class="text-lg font-semibold" onclick="this.parentElement.remove()">×</button>
+               </div>
+           {% endfor %}
+       {% endif %}
+   {% endwith %}
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h3>Change Password</h3>
-            <form method="POST" action="{{ url_for('change_password') }}">
-                <div class="mb-3">
-                    <label for="current_password" class="form-label">Current Password</label>
-                    <input type="password" class="form-control" id="current_password" name="current_password" required>
-                </div>
-                <div class="mb-3">
-                    <label for="new_password" class="form-label">New Password</label>
-                    <input type="password" class="form-control" id="new_password" name="new_password" required>
-                </div>
-                <div class="mb-3">
-                    <label for="confirm_password" class="form-label">Confirm New Password</label>
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Update Password</button>
-            </form>
-        </div>
-    </div>
+   <div class="bg-white rounded-xl shadow-md mb-8">
+       <div class="p-6">
+           <h3 class="text-xl font-bold mb-6">Change Password</h3>
+           <form method="POST" action="{{ url_for('change_password') }}" class="max-w-md">
+               <div class="mb-4">
+                   <label for="current_password" class="block text-gray-700 font-medium mb-2">Current Password</label>
+                   <input type="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="current_password" name="current_password" required>
+               </div>
+               <div class="mb-4">
+                   <label for="new_password" class="block text-gray-700 font-medium mb-2">New Password</label>
+                   <input type="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="new_password" name="new_password" required>
+               </div>
+               <div class="mb-6">
+                   <label for="confirm_password" class="block text-gray-700 font-medium mb-2">Confirm New Password</label>
+                   <input type="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="confirm_password" name="confirm_password" required>
+               </div>
+               <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">Update Password</button>
+           </form>
+       </div>
+   </div>
 
-    <div class="card">
-        <div class="card-body">
-            <h3>Current Users</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Role</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{% if user.is_admin %}Admin{% else %}User{% endif %}</td>
-                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+   <div class="bg-white rounded-xl shadow-md">
+       <div class="p-6">
+           <h3 class="text-xl font-bold mb-6">Current Users</h3>
+           <div class="overflow-x-auto">
+               <table class="w-full">
+                   <thead class="bg-gray-50">
+                       <tr>
+                           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                       </tr>
+                   </thead>
+                   <tbody class="divide-y divide-gray-200">
+                       {% for user in users %}
+                       <tr class="hover:bg-gray-50">
+                           <td class="px-6 py-4">{{ user.username }}</td>
+                           <td class="px-6 py-4">{% if user.is_admin %}Admin{% else %}User{% endif %}</td>
+                           <td class="px-6 py-4">{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                       </tr>
+                       {% endfor %}
+                   </tbody>
+               </table>
+           </div>
+       </div>
+   </div>
 </div>
-{% endblock %} 
+{% endblock %}

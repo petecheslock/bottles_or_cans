@@ -1,0 +1,26 @@
+{
+  "name": "bottles_or_cans",
+  "version": "1.0.0",
+  "description": "If you like listening to music on headphones, and have read the reviews for them, you'll notice that often times they sound a lot like the reviews for a bottle of wine.  Let's make a game out of this and vote on which review is for a pair of headphones (cans) or a bottle of wine.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tailwindcss -i ./static/src/input.css -o ./static/css/main.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/petecheslock/bottlesorcans.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/petecheslock/bottlesorcans/issues"
+  },
+  "homepage": "https://github.com/petecheslock/bottlesorcans#readme",
+  "dependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17"
+  }
+}

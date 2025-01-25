@@ -9,6 +9,8 @@ Bottles or Cans is a web application that allows users to submit reviews and vot
 To set up and run this application, you will need the following:
 
 - Python 3.6 or higher
+- Nodejs 22.13.1
+- Tailwindcss
 - Flask
 - Flask-SQLAlchemy
 - Pandas
@@ -35,7 +37,13 @@ You can install the required Python packages using pip. It is recommended to use
    pip install -r requirements.txt
    ```
 
-4. **Prepare the Database**
+4. **Install Tailwind**
+   ```bash
+   npm i
+   npm run build
+   ```
+
+5. **Prepare the Database**
    - You can seed the database with reviews by having a `reviews.csv` file in the same directory as the application. This file should contain the initial reviews to be imported into the database. The CSV should have the following columns: `text`, `votes_headphones`, `votes_wine`. If you don't have the file, the database will start empty and you can populate the reviews manually in the web UI.
    - Run the database initialization script to create the necessary tables and import reviews:
    ```bash
@@ -46,7 +54,7 @@ You can install the required Python packages using pip. It is recommended to use
 To run the application, execute the following command:
 
 ```bash
-python app.py
+flask run
 ```
 
 The application will start on `http://127.0.0.1:5000/` by default. You can access it through your web browser.

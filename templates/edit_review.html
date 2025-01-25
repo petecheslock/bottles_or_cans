@@ -1,14 +1,15 @@
+```html
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Edit Review</h1>
+<div class="container mx-auto px-4 mt-12">
+    <h1 class="text-3xl font-bold mb-6">Edit Review</h1>
     
-    <form method="POST">
-        <div class="mb-3">
-            <label for="review_text" class="form-label">Review Text</label>
+    <form method="POST" class="max-w-2xl">
+        <div class="mb-6">
+            <label for="review_text" class="block text-gray-700 font-medium mb-2">Review Text</label>
             <textarea 
-                class="form-control" 
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 id="review_text" 
                 name="review_text" 
                 rows="5" 
@@ -16,16 +17,23 @@
             >{{ review.text }}</textarea>
         </div>
         
-        <div class="mb-3">
-            <p class="text-muted">
+        <div class="mb-6">
+            <p class="text-gray-600">
                 Current Votes: 
                 Headphones ({{ review.votes_headphones }}) | 
                 Wine ({{ review.votes_wine }})
             </p>
         </div>
         
-        <button type="submit" class="btn btn-primary">Update Review</button>
-        <a href="{{ url_for('manage_reviews') }}" class="btn btn-secondary">Cancel</a>
+        <div class="flex gap-4">
+            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">
+                Update Review
+            </button>
+            <a href="{{ url_for('manage_reviews') }}" class="px-6 py-2 bg-gray-500 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">
+                Cancel
+            </a>
+        </div>
     </form>
 </div>
-{% endblock %} 
+{% endblock %}
+```

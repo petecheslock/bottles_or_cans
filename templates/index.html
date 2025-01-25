@@ -1,120 +1,101 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    {% if review %}
-        <div class="card animate__animated animate__fadeIn">
-            <div class="card-body">
-                <div class="review-text text-center">
-                    "{{ review.text }}"
-                </div>
-                
-                <div class="vote-buttons {% if has_voted %}hidden{% endif %} text-center">
-                    <div class="d-flex justify-content-center gap-4">
-                        <button onclick="submitVote('headphones')" class="btn btn-primary vote-btn animate__animated animate__fadeIn">
-                            <i class="bi bi-headphones me-2"></i>Cans
-                        </button>
-                        <button onclick="submitVote('wine')" class="btn btn-danger vote-btn animate__animated animate__fadeIn">
-                            <i class="fa-solid fa-wine-bottle me-2"></i>Bottles
-                        </button>
-                    </div>
-                </div>
+<div class="container mx-auto px-4 mt-12">
+   {% if review %}
+       <div class="bg-white rounded-xl shadow-md animate__animated animate__fadeIn">
+           <div class="p-8">
+               <div class="text-center text-xl italic text-gray-800 p-6 mb-8 bg-gray-50 rounded-lg">
+                   "{{ review.text }}"
+               </div>
+               
+               <div class="vote-buttons {% if has_voted %}hidden{% endif %} text-center">
+                   <div class="flex justify-center gap-6">
+                       <button onclick="submitVote('headphones')" class="px-8 py-3 bg-blue-600 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300 min-w-[150px] animate__animated animate__fadeIn">
+                           <i class="bi bi-headphones mr-2"></i>Cans
+                       </button>
+                       <button onclick="submitVote('wine')" class="px-8 py-3 bg-red-600 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300 min-w-[150px] animate__animated animate__fadeIn">
+                           <i class="fa-solid fa-wine-bottle mr-2"></i>Bottles
+                       </button>
+                   </div>
+               </div>
 
-                <div class="vote-results results-container" style="display: none;">
-                    <h3 class="text-center mb-4">What Others Thought</h3>
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-2">
-                            <label class="form-label"><i class="bi bi-headphones me-2"></i>Cans (Headphones)</label>
-                            <span class="headphones-percentage">0%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar bg-primary" 
-                                 role="progressbar" 
-                                 style="width: 0%"
-                                 aria-valuenow="0" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-2">
-                            <label class="form-label"><i class="fa-solid fa-wine-bottle me-2"></i>Bottles (Wine)</label>
-                            <span class="wine-percentage">0%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar bg-danger" 
-                                 role="progressbar" 
-                                 style="width: 0%"
-                                 aria-valuenow="0" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-center mt-4">
-                        <a href="{{ url_for('index') }}" class="btn btn-primary">
-                            <i class="bi bi-arrow-right-circle me-2"></i>Play Again
-                        </a>
-                        <div class="mt-3">
-                            <a href="{{ url_for('submit_review') }}" class="text-muted">
-                                <i class="bi bi-pencil me-1"></i>Submit your own review
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% else %}
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>No reviews available.
-        </div>
-    {% endif %}
+               <div class="vote-results bg-white p-6 rounded-lg mt-8" style="display: none;">
+                   <h3 class="text-2xl font-bold text-center mb-6">What Others Thought</h3>
+                   <div class="mb-6">
+                       <div class="flex justify-between mb-2">
+                           <label class="text-gray-700"><i class="bi bi-headphones mr-2"></i>Cans (Headphones)</label>
+                           <span class="headphones-percentage">0%</span>
+                       </div>
+                       <div class="h-6 bg-gray-200 rounded-full overflow-hidden">
+                           <div class="h-full bg-blue-600 transition-all duration-1000" style="width: 0%"></div>
+                       </div>
+                   </div>
+                   <div class="mb-6">
+                       <div class="flex justify-between mb-2">
+                           <label class="text-gray-700"><i class="fa-solid fa-wine-bottle mr-2"></i>Bottles (Wine)</label>
+                           <span class="wine-percentage">0%</span>
+                       </div>
+                       <div class="h-6 bg-gray-200 rounded-full overflow-hidden">
+                           <div class="h-full bg-red-600 transition-all duration-1000" style="width: 0%"></div>
+                       </div>
+                   </div>
+                   <div class="text-center mt-8">
+                       <a href="{{ url_for('index') }}" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">
+                           <i class="bi bi-arrow-right-circle mr-2"></i>Play Again
+                       </a>
+                       <div class="mt-4">
+                           <a href="{{ url_for('submit_review') }}" class="text-gray-600 hover:text-gray-800">
+                               <i class="bi bi-pencil mr-1"></i>Submit your own review
+                           </a>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   {% else %}
+       <div class="bg-blue-100 text-blue-700 p-4 rounded-lg">
+           <i class="bi bi-info-circle mr-2"></i>No reviews available.
+       </div>
+   {% endif %}
 </div>
 
 <script>
 function submitVote(voteType) {
-    const voteButtons = document.querySelector('.vote-buttons');
-    const voteResults = document.querySelector('.vote-results');
-    const reviewId = '{{ review.id }}';
+   const voteButtons = document.querySelector('.vote-buttons');
+   const voteResults = document.querySelector('.vote-results');
+   const reviewId = '{{ review.id }}';
 
-    // Fade out vote buttons
-    voteButtons.style.opacity = '0';
-    
-    fetch('{{ url_for("vote") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `review_id=${reviewId}&vote_type=${voteType}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        setTimeout(() => {
-            // Hide buttons completely
-            voteButtons.style.display = 'none';
-            
-            // Show and animate in the results
-            voteResults.style.display = 'block';
-            voteResults.classList.add('animate__animated', 'animate__fadeIn');
-            
-            // Animate progress bars after a short delay
-            setTimeout(() => {
-                const headphonesBar = document.querySelector('.progress-bar.bg-primary');
-                const wineBar = document.querySelector('.progress-bar.bg-danger');
-                const headphonesPercentage = document.querySelector('.headphones-percentage');
-                const winePercentage = document.querySelector('.wine-percentage');
-                
-                headphonesBar.style.width = `${data.headphones_percentage}%`;
-                headphonesPercentage.textContent = `${data.headphones_percentage}%`;
-                headphonesBar.setAttribute('aria-valuenow', data.headphones_percentage);
-                
-                wineBar.style.width = `${data.wine_percentage}%`;
-                winePercentage.textContent = `${data.wine_percentage}%`;
-                wineBar.setAttribute('aria-valuenow', data.wine_percentage);
-            }, 100);
-        }, 500);
-    });
+   voteButtons.style.opacity = '0';
+   
+   fetch('{{ url_for("vote") }}', {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/x-www-form-urlencoded',
+       },
+       body: `review_id=${reviewId}&vote_type=${voteType}`
+   })
+   .then(response => response.json())
+   .then(data => {
+       setTimeout(() => {
+           voteButtons.style.display = 'none';
+           voteResults.style.display = 'block';
+           voteResults.classList.add('animate__animated', 'animate__fadeIn');
+           
+           setTimeout(() => {
+               const headphonesBar = voteResults.querySelector('.bg-blue-600');
+               const wineBar = voteResults.querySelector('.bg-red-600');
+               const headphonesPercentage = voteResults.querySelector('.headphones-percentage');
+               const winePercentage = voteResults.querySelector('.wine-percentage');
+               
+               headphonesBar.style.width = `${data.headphones_percentage}%`;
+               headphonesPercentage.textContent = `${data.headphones_percentage}%`;
+               
+               wineBar.style.width = `${data.wine_percentage}%`;
+               winePercentage.textContent = `${data.wine_percentage}%`;
+           }, 100);
+       }, 500);
+   });
 }
 </script>
-{% endblock %} 
+{% endblock %}

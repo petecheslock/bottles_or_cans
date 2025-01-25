@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,9 +12,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Tailwind CSS -->
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <script>
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
-<body class="bg-gray-50 font-sans">
-    <nav class="bg-slate-800 shadow-md animate__animated animate__fadeIn">
+<body class="bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-200">
+    <nav class="bg-slate-800 dark:bg-gray-950 shadow-md animate__animated animate__fadeIn">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap justify-between items-center py-3">
                 <a class="text-white text-lg font-semibold hover:text-gray-200 transition-colors duration-300" href="{{ url_for('index') }}">
@@ -26,7 +33,15 @@
                     </svg>
                 </button>
                 <div class="hidden lg:flex lg:items-center" id="navbarNav">
-                    <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
+                    <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 items-center">
+                        <div class="flex items-center">
+                            <button id="darkModeToggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none bg-gray-200 dark:bg-blue-600">
+                                <span class="sr-only">Toggle dark mode</span>
+                                <span id="toggleCircle" class="inline-block w-4 h-4 transform transition-transform bg-white rounded-full translate-x-1 dark:translate-x-6"></span>
+                                <i class="bi bi-sun absolute left-1 text-yellow-500 dark:text-transparent"></i>
+                                <i class="bi bi-moon absolute right-1 text-transparent dark:text-white"></i>
+                            </button>
+                        </div>
                         <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('play_game') }}">
                             <i class="bi bi-controller mr-1"></i>Play
                         </a>
@@ -70,6 +85,39 @@
         button.addEventListener('click', () => {
             menu.classList.toggle('hidden');
             menu.classList.toggle('flex');
+        });
+    </script>
+
+    <script>
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+        
+        function updateDarkMode(isDark) {
+            if (isDark) {
+                html.classList.add('dark');
+                darkModeToggle.setAttribute('aria-checked', 'true');
+            } else {
+                html.classList.remove('dark');
+                darkModeToggle.setAttribute('aria-checked', 'false');
+            }
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Initialize toggle state
+        if (html.classList.contains('dark')) {
+            darkModeToggle.setAttribute('aria-checked', 'true');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            const isDark = !html.classList.contains('dark');
+            updateDarkMode(isDark);
+        });
+
+        // Check system preference changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('darkMode')) {
+                updateDarkMode(e.matches);
+            }
         });
     </script>
 </body>

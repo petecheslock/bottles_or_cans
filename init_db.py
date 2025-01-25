@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from app import app, db, User, Review, PendingReview
+import getpass  # Add this import at the top of your script
 
 def create_tables():
     """Create all necessary tables in the database."""
@@ -17,7 +18,7 @@ def import_reviews_from_csv():
             print(f"Debug: Found {len(df)} rows in {csv_file}.")
             with app.app_context():
                 for index, row in df.iterrows():
-                    print(f"Debug: Importing review {index + 1}: {row['text']}, Votes Headphones: {row.get('votes_headphones', 0)}, Votes Wine: {row.get('votes_wine', 0)}")
+                    # print(f"Debug: Importing review {index + 1}: {row['text']}, Votes Headphones: {row.get('votes_headphones', 0)}, Votes Wine: {row.get('votes_wine', 0)}")
                     
                     new_review = Review(
                         text=row['text'],
@@ -45,12 +46,12 @@ def create_admin_user():
         break
     
     while True:
-        password = input("Enter admin password: ")
+        password = getpass.getpass("Enter admin password: ")
         if len(password) < 8 or not any(c.isupper() for c in password) or not any(c.islower() for c in password) or not any(c.isdigit() for c in password):
             print("Invalid password: must be at least 8 characters long, contain upper and lower case letters, and at least one number.")
             continue
             
-        confirm_password = input("Confirm admin password: ")
+        confirm_password = getpass.getpass("Confirm admin password: ")
         if password != confirm_password:
             print("Passwords do not match!")
             continue

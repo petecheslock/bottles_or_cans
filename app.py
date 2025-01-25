@@ -6,7 +6,7 @@ import random
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reviews.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bottles_or_cans.db'
 app.config['SQLALCHEMY_TRACK_CHANGES'] = False
 app.config['SECRET_KEY'] = '0ef430d376ef2a44e9f946682eb16ac1'
 db = SQLAlchemy(app)

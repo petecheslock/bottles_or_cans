@@ -22,7 +22,7 @@
                    {% endif %}
                {% endwith %}
 
-               <form method="POST" onsubmit="return validateForm(event)">
+               <form method="POST">
                    <div class="mb-6">
                        <label for="review_text" class="block text-gray-700 font-medium mb-2">Your Review</label>
                        <textarea 
@@ -39,21 +39,23 @@
                        </p>
                    </div>
 
-                   <div class="mb-6">
-                       <label class="block text-gray-700 font-medium mb-2">Verify you're human</label>
-                       <div class="bg-gray-50 rounded-lg p-4">
-                           <p class="mb-3">Please solve this math problem:</p>
-                           <div class="flex items-center gap-4">
-                               <span class="font-bold">{{ captcha_question }}</span>
-                               <input type="number" 
-                                      class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                      name="captcha_answer" 
-                                      id="captcha_answer"
-                                      required 
-                                      placeholder="Enter your answer">
+                   {% if not is_admin and captcha_question %}
+                       <div class="mb-6">
+                           <label class="block text-gray-700 font-medium mb-2">Verify you're human</label>
+                           <div class="bg-gray-50 rounded-lg p-4">
+                               <p class="mb-3">Please solve this math problem:</p>
+                               <div class="flex items-center gap-4">
+                                   <span class="font-bold">{{ captcha_question }}</span>
+                                   <input type="number" 
+                                          class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                          name="captcha_answer" 
+                                          id="captcha_answer"
+                                          required 
+                                          placeholder="Enter your answer">
+                               </div>
                            </div>
                        </div>
-                   </div>
+                   {% endif %}
                    
                    <div class="text-center">
                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">

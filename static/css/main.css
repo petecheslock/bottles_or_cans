@@ -1222,10 +1222,6 @@ video {
     display: none;
   }
 
-  .lg\:w-auto {
-    width: auto;
-  }
-
   .lg\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

@@ -28,10 +28,13 @@
                 <div class="hidden lg:flex lg:items-center" id="navbarNav">
                     <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
                         <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('play_game') }}">
-                            <i class="bi bi-house-door mr-1"></i>Home
+                            <i class="bi bi-controller mr-1"></i>Play
                         </a>
                         {% if session.get('logged_in') %}
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('add_review') }}">
+                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin_dashboard') }}">
+                                <i class="bi bi-house-door mr-1"></i>Home
+                            </a>
+                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('submit_review') }}">
                                 <i class="bi bi-plus-circle mr-1"></i>Add Review
                             </a>
                             <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('manage_reviews') }}">

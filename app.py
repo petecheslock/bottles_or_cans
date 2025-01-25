@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -20,12 +20,12 @@ class Review(db.Model):
     text = db.Column(db.String(500), nullable=False)
     votes_headphones = db.Column(db.Integer, default=0)
     votes_wine = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
 class PendingReview(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(500), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
     ip_address = db.Column(db.String(45), nullable=True)  # IPv6 addresses can be up to 45 chars
 
@@ -34,7 +34,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -142,37 +142,12 @@ def admin_login():
 def admin_logout():
     session.pop('logged_in', None)
     flash('Logged out successfully.', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('admin_login'))
 
 @app.route('/admin/dashboard')
 @login_required
 def admin_dashboard():
     return render_template('admin_dashboard.html')
-
-@app.route('/add-review', methods=['GET', 'POST'])
-@login_required
-def add_review():
-    print("Accessing add-review route")
-    total_reviews = Review.query.count()
-    
-    if request.method == 'POST':
-        # Generate random seed votes
-        seed_headphones = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
-        seed_wine = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
-        
-        new_review = Review(
-            text=request.form.get('review_text'),
-            votes_headphones=seed_headphones,  # Add seed votes
-            votes_wine=seed_wine              # Add seed votes
-        )
-        
-        db.session.add(new_review)
-        db.session.commit()
-        
-        flash('Review added successfully! Add another?', 'success')
-        return redirect(url_for('add_review'))
-    
-    return render_template('add_review.html', total_reviews=total_reviews)
 
 @app.route('/manage-reviews')
 @login_required
@@ -260,51 +235,82 @@ def generate_captcha():
     question = f"{num1} {operator} {num2} = ?"
     return question, str(answer)
 
-# Add a rate limiting helper function
-def check_rate_limit(ip_address, limit_minutes=10):
-    # Check how many submissions this IP has made in the last hour
-    cutoff_time = datetime.utcnow() - timedelta(minutes=limit_minutes)
+# Update the rate limiting helper function to check for admin status
+def check_rate_limit(ip_address, limit_minutes=30):
+    # First check if user is logged in and is admin
+    if session.get('logged_in') and session.get('user_id'):
+        user = User.query.get(session.get('user_id'))
+        if user and user.is_admin:
+            return True  # Admins bypass rate limiting
+    
+    # For non-admin users, check submission rate
+    cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=limit_minutes)
     recent_submissions = PendingReview.query.filter(
         PendingReview.ip_address == ip_address,
         PendingReview.created_at >= cutoff_time
     ).count()
     
-    # Limit to 5 submissions per 10 minutes
     return recent_submissions < 5
 
 @app.route('/submit-review', methods=['GET', 'POST'])
 def submit_review():
+    is_admin = session.get('logged_in') and session.get('user_id') and \
+               User.query.get(session.get('user_id')).is_admin
+
     if request.method == 'POST':
         ip_address = request.remote_addr
+        review_text = request.form.get('review_text')
         
-        # Check rate limit
-        if not check_rate_limit(ip_address):
-            flash('You have submitted too many reviews. Please wait before trying again.', 'danger')
-            captcha_question, captcha_answer = generate_captcha()
-            session['captcha_answer'] = captcha_answer
-            return render_template('submit_review.html', captcha_question=captcha_question)
+        # For non-admin users, check rate limit and captcha
+        if not is_admin:
+            if not check_rate_limit(ip_address):
+                flash('You have submitted too many reviews. Please wait before trying again.', 'danger')
+                captcha_question, captcha_answer = generate_captcha()
+                session['captcha_answer'] = captcha_answer
+                return render_template('submit_review.html', captcha_question=captcha_question, is_admin=is_admin)
 
-        user_answer = request.form.get('captcha_answer')
-        correct_answer = session.get('captcha_answer')
+            user_answer = request.form.get('captcha_answer')
+            correct_answer = session.get('captcha_answer')
+            
+            if not user_answer or not correct_answer or user_answer != correct_answer:
+                flash('Please solve the math problem correctly.', 'danger')
+                captcha_question, captcha_answer = generate_captcha()
+                session['captcha_answer'] = captcha_answer
+                return render_template('submit_review.html', captcha_question=captcha_question, is_admin=is_admin)
+
+            # Create pending review for non-admin users
+            new_review = PendingReview(
+                text=review_text,
+                ip_address=ip_address
+            )
+        else:
+            # Create direct review with seed votes for admin users
+            seed_headphones = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
+            seed_wine = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
+            new_review = Review(
+                text=review_text,
+                votes_headphones=seed_headphones,
+                votes_wine=seed_wine
+            )
         
-        if not user_answer or not correct_answer or user_answer != correct_answer:
-            flash('Please solve the math problem correctly.', 'danger')
-            captcha_question, captcha_answer = generate_captcha()
-            session['captcha_answer'] = captcha_answer
-            return render_template('submit_review.html', captcha_question=captcha_question)
-
-        new_pending_review = PendingReview(
-            text=request.form.get('review_text'),
-            ip_address=ip_address
-        )
-        db.session.add(new_pending_review)
+        db.session.add(new_review)
         db.session.commit()
+        
+        if is_admin:
+            flash('Review added successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
+        session['voted_reviews'] = []  # Reset voted reviews when submitting a new one
         return render_template('thank_you.html')
     
-    # Generate new CAPTCHA for GET request
-    captcha_question, captcha_answer = generate_captcha()
-    session['captcha_answer'] = captcha_answer
-    return render_template('submit_review.html', captcha_question=captcha_question)
+    # GET request
+    captcha_question = None
+    if not is_admin:
+        captcha_question, captcha_answer = generate_captcha()
+        session['captcha_answer'] = captcha_answer
+    
+    return render_template('submit_review.html', 
+                         captcha_question=captcha_question,
+                         is_admin=is_admin)
 
 @app.route('/pending-reviews')
 @login_required

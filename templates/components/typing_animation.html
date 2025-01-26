@@ -1,0 +1,52 @@
+<style>
+.typing-cursor {
+    display: inline-block;
+    width: 0.6em;  /* Made wider for a square look */
+    height: 1.2em;
+    background-color: currentColor;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+    opacity: 0.7;  /* Slightly transparent for a softer look */
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0; }
+}
+</style>
+
+<script>
+function typeText(text, elementId, baseSpeed = 22) {
+    const element = document.getElementById(elementId);
+    element.textContent = '';
+    
+    // Add cursor element
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    element.appendChild(cursor);
+    
+    let index = 0;
+    function type() {
+        if (index < text.length) {
+            cursor.insertAdjacentText('beforebegin', text.charAt(index));
+            index++;
+            
+            const variation = Math.random() * 22 - 11;
+            const delay = baseSpeed + variation;
+            
+            const char = text.charAt(index - 1);
+            if ('.!?'.includes(char)) {
+                setTimeout(type, delay + 100);
+            } else if (',;:'.includes(char)) {
+                setTimeout(type, delay + 50);
+            } else {
+                setTimeout(type, delay);
+            }
+        }
+    }
+    type();
+    
+    return text.length * baseSpeed + 560;
+}
+</script> 

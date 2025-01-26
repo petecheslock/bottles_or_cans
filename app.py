@@ -199,12 +199,11 @@ def reset_votes():
             Review.votes_wine: 0
         })
         db.session.commit()
-        flash('All vote counts have been reset successfully!', 'success')
+        
+        return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
-        flash('Error resetting votes. Please try again.', 'danger')
-    
-    return redirect(url_for('manage_reviews'))
+        return jsonify({'success': False, 'message': str(e)})
 
 @app.route('/seed-reviews', methods=['POST'])
 @login_required

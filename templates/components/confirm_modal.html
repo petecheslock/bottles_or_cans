@@ -27,7 +27,6 @@ function showConfirmModal(id, action, title, message) {
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalMessage').textContent = message;
     document.getElementById('confirmModal').classList.remove('hidden');
-    // Add event listener for escape key when modal opens
     document.addEventListener('keydown', handleEscapeKey);
 }
 
@@ -35,7 +34,6 @@ function hideConfirmModal() {
     document.getElementById('confirmModal').classList.add('hidden');
     currentFormId = null;
     currentAction = null;
-    // Remove event listener when modal closes
     document.removeEventListener('keydown', handleEscapeKey);
 }
 
@@ -45,17 +43,5 @@ function handleEscapeKey(e) {
     }
 }
 
-document.getElementById('confirmAction').addEventListener('click', function() {
-    if (currentFormId) {
-        document.getElementById(`${currentAction}Form-${currentFormId}`).submit();
-    }
-    hideConfirmModal();
-});
-
-// Close modal when clicking outside
-document.getElementById('confirmModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        hideConfirmModal();
-    }
-});
+// Remove the existing click handler and let manage_reviews.html handle it
 </script> 

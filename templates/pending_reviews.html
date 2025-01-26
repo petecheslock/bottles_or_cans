@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<!-- Include the modal component at the top of the template -->
+{% include 'components/confirm_modal.html' %}
+
 <div class="container mx-auto px-4 mt-12">
     <div class="max-w-[1600px] mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
@@ -32,7 +35,10 @@
                                 <tr>
                                     <td class="px-6 py-4">
                                         <div class="text-sm text-gray-900 dark:text-gray-200">{{ review.text }}</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">Submitted: {{ review.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-4">
+                                            <span><i class="bi bi-clock mr-1"></i>{{ review.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                                            <span><i class="bi bi-globe mr-1"></i>{{ review.ip_address or 'Unknown IP' }}</span>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-start">
@@ -42,9 +48,16 @@
                                                     <i class="bi bi-check-circle mr-1"></i>Approve
                                                 </button>
                                             </form>
-                                            <form method="POST" action="{{ url_for('review_action', review_id=review.id, action='reject') }}" class="inline">
-                                                <button type="submit" 
-                                                        onclick="return confirm('Are you sure you want to reject this review?')"
+                                            <form method="POST" action="{{ url_for('review_action', review_id=review.id, action='reject') }}" 
+                                                  class="inline" 
+                                                  id="rejectForm-{{ review.id }}">
+                                                <button type="button" 
+                                                        onclick="showConfirmModal(
+                                                            {{ review.id }}, 
+                                                            'reject',
+                                                            'Confirm Rejection',
+                                                            'Are you sure you want to reject this review?'
+                                                        )"
                                                         class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 px-4">
                                                     <i class="bi bi-x-circle mr-1"></i>Reject
                                                 </button>
@@ -74,4 +87,33 @@
         </div>
     </div>
 </div>
+
+<!-- Add this script at the bottom of the template -->
+<script>
+let currentRejectFormId = null;
+
+function showRejectModal(reviewId) {
+    currentRejectFormId = reviewId;
+    document.getElementById('rejectModal').classList.remove('hidden');
+}
+
+function hideRejectModal() {
+    document.getElementById('rejectModal').classList.add('hidden');
+    currentRejectFormId = null;
+}
+
+document.getElementById('confirmReject').addEventListener('click', function() {
+    if (currentRejectFormId) {
+        document.getElementById(`rejectForm-${currentRejectFormId}`).submit();
+    }
+    hideRejectModal();
+});
+
+// Close modal when clicking outside
+document.getElementById('rejectModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideRejectModal();
+    }
+});
+</script>
 {% endblock %}

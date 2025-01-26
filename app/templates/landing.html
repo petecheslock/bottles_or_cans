@@ -1,21 +1,57 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center px-4">
-    <div class="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg animate__animated animate__fadeIn p-8">
-        <h1 class="text-4xl font-bold text-center mb-6 text-gray-900 dark:text-white">Welcome to Bottles or Cans!</h1>
-        
-        <div class="text-gray-600 dark:text-gray-300 space-y-4 mb-8">
-            <p>Can you tell the difference between wine reviews and headphone reviews? Let's find out!</p>
-            <p>You'll be shown a review, and you need to guess whether it's describing a bottle of wine or a pair of headphones (cans).</p>
-        </div>
+<div class="container mx-auto px-4 mt-12">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
+            <div class="p-8 text-center">
+                <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">Welcome to Bottles or Cans!</h1>
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <div class="text-6xl mb-4">
+                            <i class="fa-solid fa-wine-bottle text-red-500 dark:text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Bottles</h3>
+                        <p class="text-gray-600 dark:text-gray-400">(Wine Reviews)</p>
+                    </div>
+                    <div>
+                        <div class="text-6xl mb-4">
+                            <i class="bi bi-headphones text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Cans</h3>
+                        <p class="text-gray-600 dark:text-gray-400">(Headphone Reviews)</p>
+                    </div>
+                </div>
 
-        <div class="flex justify-center">
-            <a href="{{ url_for('main.start_game') }}" 
-               class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full 
-                      hover:-translate-y-0.5 transition-all duration-300 text-lg font-semibold">
-                <i class="bi bi-controller mr-2"></i>Start Playing
-            </a>
+                <p class="text-xl text-gray-700 dark:text-gray-300 mb-8">
+                    Wine enthusiasts and audiophiles often use surprisingly similar language to describe their experiences. 
+                    Can you tell the difference between a wine review and a headphone review?
+                </p>
+
+                <div class="my-12">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">How to Play</h2>
+                    <p class="text-xl text-gray-700 dark:text-gray-300 mb-4">
+                        Read ambiguous reviews and guess: is it about wine (bottles) or headphones (cans)?
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-12">
+                    <p class="italic text-lg text-gray-800 dark:text-gray-200">
+                        "Rich and full-bodied with excellent depth. The bass notes are particularly impressive, 
+                        with a smooth finish that lingers pleasantly."
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400 mt-4">
+                        Is this about wine or headphones? You decide!
+                    </p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('main.start_game') }}" 
+                       class="inline-flex items-center px-6 py-3 text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-full hover:-translate-y-0.5 transition-all duration-300 animate__animated animate__pulse animate__infinite">
+                        <i class="bi bi-play-fill mr-2"></i>Start Playing
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

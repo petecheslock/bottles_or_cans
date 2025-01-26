@@ -4,6 +4,10 @@ from datetime import datetime, timedelta, timezone
 from functools import wraps
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
+from captcha.image import ImageCaptcha
+import string
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bottles_or_cans.db'
@@ -221,19 +225,35 @@ def seed_reviews():
     
     return redirect(url_for('manage_reviews'))
 
-def generate_captcha():
-    num1 = random.randint(1, 10)
-    num2 = random.randint(1, 10)
-    operator = random.choice(['+', '-'])
-    if operator == '+':
-        answer = num1 + num2
-    else:
-        # Ensure subtraction always gives positive result
-        if num1 < num2:
-            num1, num2 = num2, num1
-        answer = num1 - num2
-    question = f"{num1} {operator} {num2} = ?"
-    return question, str(answer)
+def generate_image_captcha():
+    # Create image with custom settings
+    image = ImageCaptcha(
+        width=280,          # Increase width for better readability
+        height=90,          # Comfortable height
+        fonts=[             # Use more readable fonts if available
+            'Arial',
+            'Courier',
+            'Times New Roman'
+        ],
+        font_sizes=(46, 58, 68)  # Larger font sizes
+    )
+
+    # Generate simpler text - avoid confusing characters
+    allowed_chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'  # Removed confusing chars like I,1,0,O
+    captcha_text = ''.join(random.choices(allowed_chars, k=5))  # Reduced to 5 characters
+    
+    # Add custom settings for image generation
+    captcha_image = image.generate(
+        captcha_text,
+        format='png'
+    )
+    
+    # Convert to base64
+    buffered = BytesIO()
+    image.write(captcha_text, buffered)
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    
+    return captcha_text, img_str
 
 # Update the rate limiting helper function to check for admin status
 def check_rate_limit(ip_address, limit_minutes=30):
@@ -278,18 +298,22 @@ def submit_review():
         if not is_admin:
             if not check_rate_limit(ip_address):
                 flash('You have submitted too many reviews. Please wait before trying again.', 'danger')
-                captcha_question, captcha_answer = generate_captcha()
-                session['captcha_answer'] = captcha_answer
-                return render_template('submit_review.html', captcha_question=captcha_question, is_admin=is_admin)
+                captcha_text, captcha_image = generate_image_captcha()
+                session['captcha_answer'] = captcha_text
+                return render_template('submit_review.html', 
+                                     captcha_image=captcha_image,
+                                     is_admin=is_admin)
 
-            user_answer = request.form.get('captcha_answer')
+            user_answer = request.form.get('captcha_answer', '').upper()
             correct_answer = session.get('captcha_answer')
             
             if not user_answer or not correct_answer or user_answer != correct_answer:
-                flash('Please solve the math problem correctly.', 'danger')
-                captcha_question, captcha_answer = generate_captcha()
-                session['captcha_answer'] = captcha_answer
-                return render_template('submit_review.html', captcha_question=captcha_question, is_admin=is_admin)
+                flash('Please enter the CAPTCHA text correctly.', 'danger')
+                captcha_text, captcha_image = generate_image_captcha()
+                session['captcha_answer'] = captcha_text
+                return render_template('submit_review.html', 
+                                     captcha_image=captcha_image,
+                                     is_admin=is_admin)
 
             # Create pending review for non-admin users
             new_review = PendingReview(
@@ -313,16 +337,16 @@ def submit_review():
             flash('Review added successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         session['voted_reviews'] = []  # Reset voted reviews when submitting a new one
-        return render_template('thank_you.html')
+        return render_template('submit_thanks.html')
     
     # GET request
-    captcha_question = None
+    captcha_image = None
     if not is_admin:
-        captcha_question, captcha_answer = generate_captcha()
-        session['captcha_answer'] = captcha_answer
+        captcha_text, captcha_image = generate_image_captcha()
+        session['captcha_answer'] = captcha_text
     
     return render_template('submit_review.html', 
-                         captcha_question=captcha_question,
+                         captcha_image=captcha_image,
                          is_admin=is_admin)
 
 @app.route('/pending-reviews')
@@ -430,6 +454,14 @@ def manage_rate_limits():
     
     rate_limits = RateLimit.query.order_by(RateLimit.last_attempt.desc()).all()
     return render_template('rate_limits.html', rate_limits=rate_limits)
+
+@app.route('/refresh-captcha', methods=['POST'])
+def refresh_captcha():
+    captcha_text, captcha_image = generate_image_captcha()
+    session['captcha_answer'] = captcha_text
+    return jsonify({
+        'captcha_image': captcha_image
+    })
 
 if __name__ == '__main__':
     with app.app_context():

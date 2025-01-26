@@ -2,3 +2,4 @@ Flask==3.0.0
 Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.23 
 pandas==2.2.3
+captcha==0.6.0

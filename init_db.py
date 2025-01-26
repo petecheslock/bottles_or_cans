@@ -1,16 +1,21 @@
 import json
 from datetime import datetime
-from app import app, db, User, Review, PendingReview
+from app import create_app
+from app.extensions import db
+from app.models.user import User
+from app.models.review import Review, PendingReview
 import getpass
 
 def create_tables():
     """Create all necessary tables in the database."""
+    app = create_app()
     with app.app_context():
         db.create_all()
         print("Database and tables created successfully!")
 
 def import_reviews_from_json():
     """Import reviews from reviews_export.json if it exists."""
+    app = create_app()
     try:
         with open('reviews_export.json', 'r') as f:
             reviews = json.load(f)
@@ -40,6 +45,7 @@ def import_reviews_from_json():
 
 def create_admin_user():
     """Prompt for admin user credentials and create the user."""
+    app = create_app()
     print("\n=== Create Admin User ===")
     
     while True:
@@ -77,6 +83,7 @@ def main():
     create_tables()
     import_reviews_from_json()
     
+    app = create_app()
     with app.app_context():
         if User.query.count() == 0:  # Check if there are no users
             create_admin_user()

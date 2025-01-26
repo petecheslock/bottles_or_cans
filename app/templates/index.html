@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        {% if review %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 mb-8 animate__animated animate__fadeIn">
+                <div class="text-xl text-gray-800 dark:text-gray-200 mb-8 text-center">
+                    "{{ review.text }}"
+                </div>
+
+                <div class="flex justify-center space-x-4">
+                    <button onclick="submitVote('{{ review.id }}', 'headphones')"
+                            class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full 
+                                   hover:-translate-y-0.5 transition-all duration-300">
+                        <i class="bi bi-headphones mr-2"></i>Headphones
+                    </button>
+                    <button onclick="submitVote('{{ review.id }}', 'wine')"
+                            class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full 
+                                   hover:-translate-y-0.5 transition-all duration-300">
+                        <i class="fa-solid fa-wine-bottle mr-2"></i>Wine
+                    </button>
+                </div>
+
+                <div id="results" class="mt-8 hidden animate__animated animate__fadeIn">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-700 dark:text-gray-300">Headphones</span>
+                        <span id="headphones-percentage" class="text-gray-700 dark:text-gray-300">{{ headphones_percentage }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="headphones-bar" 
+                             class="bg-purple-600 h-2.5 rounded-full transition-all duration-500"
+                             style="width: {{ headphones_percentage }}%">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-2 mt-4">
+                        <span class="text-gray-700 dark:text-gray-300">Wine</span>
+                        <span id="wine-percentage" class="text-gray-700 dark:text-gray-300">{{ wine_percentage }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="wine-bar" 
+                             class="bg-red-600 h-2.5 rounded-full transition-all duration-500"
+                             style="width: {{ wine_percentage }}%">
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-8">
+                        <a href="{{ url_for('main.play_game') }}" 
+                           class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full 
+                                  hover:-translate-y-0.5 transition-all duration-300 inline-block">
+                            <i class="bi bi-arrow-repeat mr-2"></i>Next Review
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center text-gray-600 dark:text-gray-400">
+                No reviews available at the moment.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function submitVote(reviewId, voteType) {
+    fetch('/vote', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `review_id=${reviewId}&vote_type=${voteType}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('headphones-percentage').textContent = `${data.headphones_percentage}%`;
+        document.getElementById('wine-percentage').textContent = `${data.wine_percentage}%`;
+        
+        document.getElementById('headphones-bar').style.width = `${data.headphones_percentage}%`;
+        document.getElementById('wine-bar').style.width = `${data.wine_percentage}%`;
+        
+        document.getElementById('results').classList.remove('hidden');
+        
+        // Disable vote buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.disabled = true;
+            button.classList.add('opacity-50', 'cursor-not-allowed');
+        });
+    });
+}
+</script>
+{% endblock %}

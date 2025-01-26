@@ -2,7 +2,9 @@ import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from app import app, db
+from app import create_app
+from app.extensions import db
+from app.config import TestingConfig
 import threading
 from werkzeug.serving import make_server
 
@@ -21,10 +23,13 @@ class ServerThread(threading.Thread):
 
 @pytest.fixture
 def flask_server():
-    # Configure Flask for testing
-    app.config['TESTING'] = True
-    app.config['SERVER_NAME'] = 'localhost:5000'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # Use in-memory database for testing
+    # Create app with test config
+    app = create_app(TestingConfig)
+    app.config.update({
+        'TESTING': True,
+        'SERVER_NAME': 'localhost:5000',
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:'
+    })
     
     # Create all tables
     with app.app_context():

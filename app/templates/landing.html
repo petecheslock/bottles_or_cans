@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg animate__animated animate__fadeIn p-8">
+        <h1 class="text-4xl font-bold text-center mb-6 text-gray-900 dark:text-white">Welcome to Bottles or Cans!</h1>
+        
+        <div class="text-gray-600 dark:text-gray-300 space-y-4 mb-8">
+            <p>Can you tell the difference between wine reviews and headphone reviews? Let's find out!</p>
+            <p>You'll be shown a review, and you need to guess whether it's describing a bottle of wine or a pair of headphones (cans).</p>
+        </div>
+
+        <div class="flex justify-center">
+            <a href="{{ url_for('main.start_game') }}" 
+               class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full 
+                      hover:-translate-y-0.5 transition-all duration-300 text-lg font-semibold">
+                <i class="bi bi-controller mr-2"></i>Start Playing
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

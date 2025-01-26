@@ -3,3 +3,6 @@ coverage
 pytest-cov 
 selenium>=4.16.0
 webdriver-manager>=4.0.1
+selenium>=4.16.0
+webdriver-manager>=4.0.1
+Flask-Login==0.6.3

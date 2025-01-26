@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Admin Dashboard</h1>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Quick Actions</h2>
+                <div class="space-y-4">
+                    <a href="{{ url_for('main.admin_submit') }}" 
+                       class="block w-full text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 
+                              text-white rounded-lg transition-colors duration-300">
+                        <i class="bi bi-plus-circle mr-2"></i>Add New Review
+                    </a>
+                    <a href="{{ url_for('admin.manage_reviews') }}" 
+                       class="block w-full text-center px-4 py-2 bg-green-600 hover:bg-green-700 
+                              text-white rounded-lg transition-colors duration-300">
+                        <i class="bi bi-gear mr-2"></i>Manage Reviews
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">System Status</h2>
+                <div class="space-y-4">
+                    <a href="{{ url_for('admin.pending_reviews') }}" 
+                       class="block w-full text-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 
+                              text-white rounded-lg transition-colors duration-300">
+                        <i class="bi bi-inbox mr-2"></i>Pending Reviews
+                    </a>
+                    <a href="{{ url_for('admin.manage_rate_limits') }}" 
+                       class="block w-full text-center px-4 py-2 bg-purple-600 hover:bg-purple-700 
+                              text-white rounded-lg transition-colors duration-300">
+                        <i class="bi bi-shield-check mr-2"></i>Rate Limits
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

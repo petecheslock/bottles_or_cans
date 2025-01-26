@@ -1,0 +1,151 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from app.models.review import Review, PendingReview
+from app.models.user import User
+from app.models.rate_limit import RateLimit
+from app.utils.decorators import login_required
+from app.extensions import db
+import random
+from app.services.review import ReviewService
+from app.services.rate_limit import RateLimitService
+
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+SEED_VOTES_MIN = 10
+SEED_VOTES_MAX = 20
+
+@admin_bp.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('admin_dashboard.html')
+
+@admin_bp.route('/manage-reviews')
+@login_required
+def manage_reviews():
+    reviews = ReviewService.get_all_reviews()
+    return render_template('manage_reviews.html', reviews=reviews)
+
+@admin_bp.route('/delete-review/<int:review_id>', methods=['POST'])
+@login_required
+def delete_review(review_id):
+    ReviewService.delete_review(review_id)
+    flash('Review deleted successfully!', 'success')
+    return redirect(url_for('admin.manage_reviews'))
+
+@admin_bp.route('/edit-review/<int:review_id>', methods=['GET', 'POST'])
+@login_required
+def edit_review(review_id):
+    if request.method == 'POST':
+        text = request.form.get('review_text')
+        ReviewService.update_review(review_id, text)
+        flash('Review updated successfully!', 'success')
+        return redirect(url_for('admin.manage_reviews'))
+    
+    review = ReviewService.get_review(review_id)
+    return render_template('edit_review.html', review=review)
+
+@admin_bp.route('/pending-reviews')
+@login_required
+def pending_reviews():
+    pending = ReviewService.get_pending_reviews()
+    return render_template('pending_reviews.html', pending_reviews=pending)
+
+@admin_bp.route('/approve-pending/<int:review_id>', methods=['POST'])
+@login_required
+def approve_pending(review_id):
+    """Approve a pending review"""
+    ReviewService.approve_pending_review(review_id)
+    flash('Review approved successfully!', 'success')
+    return redirect(url_for('admin.pending_reviews'))
+
+@admin_bp.route('/reject-pending/<int:review_id>', methods=['POST'])
+@login_required
+def reject_pending(review_id):
+    """Reject a pending review"""
+    ReviewService.reject_pending_review(review_id)
+    flash('Review rejected successfully!', 'success')
+    return redirect(url_for('admin.pending_reviews'))
+
+@admin_bp.route('/rate-limits', methods=['GET', 'POST'])
+@login_required
+def manage_rate_limits():
+    if request.method == 'POST':
+        ip_address = request.form.get('ip_address')
+        action = request.form.get('action')
+        
+        if action == 'unblock':
+            RateLimitService.unblock_ip(ip_address)
+            flash('IP address unblocked successfully.', 'success')
+        elif action == 'block':
+            RateLimitService.block_ip(ip_address)
+            flash('IP address blocked successfully.', 'success')
+    
+    rate_limits = RateLimitService.get_all_rate_limits()
+    return render_template('rate_limits.html', rate_limits=rate_limits)
+
+@admin_bp.route('/users')
+@login_required
+def manage_users():
+    users = User.query.all()
+    return render_template('manage_users.html', users=users)
+
+@admin_bp.route('/test-text-display')
+@login_required
+def test_text_display():
+    test_reviews = [
+        {
+            "text": "Short review.",
+            "description": "Very short review"
+        },
+        {
+            "text": "This is a medium length review that should fit comfortably in the container without any issues.",
+            "description": "Medium length review"
+        },
+        {
+            "text": "This is a longer review with multiple sentences. It includes some punctuation marks, which affect typing speed. The container should adjust properly to fit all this text without any visual issues.",
+            "description": "Long review with multiple sentences"
+        },
+        {
+            "text": "A very long review that goes into great detail. It contains multiple paragraphs.\n\nThe second paragraph adds significant height. There are also some very long sentences that might wrap multiple times depending on the screen width.\n\nFinally, a third paragraph to really test the limits of the container sizing.",
+            "description": "Multi-paragraph review"
+        },
+        {
+            "text": "Edge case with lots of punctuation... !!! ??? ,,, ;;; ::: Testing how the timing and container handles unusual punctuation patterns!?!?!",
+            "description": "Review with heavy punctuation"
+        }
+    ]
+    return render_template('test_text_display.html', test_reviews=test_reviews)
+
+@admin_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password):
+            session['user_id'] = user.id
+            flash('Logged in successfully', 'success')
+            return redirect(url_for('admin.dashboard'))
+        else:
+            flash('Invalid credentials', 'danger')
+            
+    return render_template('admin_login.html')
+
+@admin_bp.route('/reset-votes/<int:review_id>', methods=['POST'])
+@login_required
+def reset_votes(review_id):
+    """Reset the votes for a specific review"""
+    ReviewService.reset_votes(review_id)
+    return jsonify({'success': True})
+
+@admin_bp.route('/seed-reviews', methods=['POST'])
+@login_required
+def seed_reviews():
+    """Seed reviews with random votes for testing"""
+    reviews = Review.query.all()
+    for review in reviews:
+        review.votes_headphones = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
+        review.votes_wine = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
+    db.session.commit()
+    return jsonify({'success': True}) 

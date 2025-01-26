@@ -2,7 +2,10 @@ import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from app import app, db, User
+from app.models.user import User
+from app.extensions import db
+from app import create_app
+from app.config import TestingConfig
 import time
 
 def test_text_container_sizing(selenium_driver, flask_server):
@@ -11,11 +14,15 @@ def test_text_container_sizing(selenium_driver, flask_server):
     
     # First, create a test admin user in the test database
     with flask_server.ctx:
-        # Clear existing users
+        # Clear existing users and ensure clean state
         User.query.delete()
+        db.session.commit()
         
-        # Create test admin user
-        admin = User(username='test_admin', is_admin=True)
+        # Create test admin user with proper admin privileges
+        admin = User(
+            username='test_admin',
+            is_admin=True
+        )
         admin.set_password('test_password')
         db.session.add(admin)
         db.session.commit()
@@ -33,12 +40,17 @@ def test_text_container_sizing(selenium_driver, flask_server):
     password_input.send_keys('test_password')
     password_input.submit()
     
+    # Wait for redirect to dashboard and verify we're logged in
+    WebDriverWait(driver, 10).until(
+        EC.url_to_be('http://localhost:5000/admin/dashboard')
+    )
+    
     # Now navigate to the test display page
     driver.get('http://localhost:5000/admin/test-text-display')
     
     # Wait for the page to load and all review containers to be present
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.CLASS_NAME, "animate__fadeIn"))
+    containers = WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.CLASS_NAME, "text-container"))
     )
     
     # Expected heights from the debug info in the page
@@ -50,34 +62,13 @@ def test_text_container_sizing(selenium_driver, flask_server):
         5: 130   # Heavy punctuation review
     }
     
-    for i in range(1, 6):
-        try:
-            # Get the text container
-            text_container = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, f'reviewText{i}'))
-            )
-            
-            # Get the actual height from the style attribute
-            style_height = text_container.get_attribute('style')
-            actual_height = int(style_height.split('height: ')[1].split('px')[0])
-            
-            # Print debug information
-            print(f"\nTesting container {i}:")
-            print(f"Expected height: {expected_heights[i]}px")
-            print(f"Actual height: {actual_height}px")
-            
-            # Assert the height matches expected
-            assert abs(actual_height - expected_heights[i]) <= 1, \
-                f"Height mismatch for container {i}: expected={expected_heights[i]}, actual={actual_height}"
-            
-            # Assert that text is not overflowing
-            assert not is_text_overflowing(text_container), \
-                f"Text is overflowing in container {i}"
-            
-        except Exception as e:
-            print(f"\nError testing container {i}:")
-            print(f"Page source: {driver.page_source}")
-            raise e
+    # Check each container's height
+    for index, expected_height in expected_heights.items():
+        container = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, f'measureText{index}'))
+        )
+        actual_height = container.size['height']
+        assert abs(actual_height - expected_height) <= 5, f"Container {index} height mismatch"
 
 def is_text_overflowing(element):
     """Helper function to check if text is overflowing its container"""

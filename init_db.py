@@ -62,13 +62,15 @@ def create_admin_user():
             
         break
     
-    new_admin = User(username=username, is_admin=True)
-    new_admin.set_password(password)
-    
     with app.app_context():
-        db.session.add(new_admin)
-        db.session.commit()
-        print("Admin user created successfully!")
+        if not User.query.filter_by(username=username).first():
+            new_admin = User(username=username, is_admin=True)
+            new_admin.set_password(password)
+            db.session.add(new_admin)
+            db.session.commit()
+            print("Admin user created successfully!")
+        else:
+            print(f"User '{username}' already exists!")
 
 def main():
     """Main function to initialize the database."""
@@ -81,5 +83,6 @@ def main():
         else:
             print("Admin user already exists.")
 
-if __name__ == "__main__":
-    main() 
+if __name__ == '__main__':
+    main()
+    print("Database initialized successfully!") 

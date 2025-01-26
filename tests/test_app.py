@@ -1,4 +1,7 @@
 import unittest
+import os
+os.environ['DATABASE_URL'] = 'sqlite:///test.db'
+
 from app import app, db, User, Review, PendingReview, RateLimit
 from datetime import datetime, timezone
 import json
@@ -116,13 +119,13 @@ class FlaskAppTests(unittest.TestCase):
         })
 
         # Test viewing reviews
-        response = self.client.get('/manage-reviews')
+        response = self.client.get('/admin/manage-reviews')
         self.assertEqual(response.status_code, 200)
 
-        # Test editing review
+        # Test editing review - Update URL here
         with app.app_context():
             review = Review.query.first()
-            response = self.client.post(f'/edit-review/{review.id}', data={
+            response = self.client.post(f'/admin/edit-review/{review.id}', data={  # Changed from '/edit-review'
                 'review_text': 'Updated review text'
             }, follow_redirects=True)
             self.assertEqual(response.status_code, 200)
@@ -211,7 +214,8 @@ class FlaskAppTests(unittest.TestCase):
 
         with app.app_context():
             review = Review.query.first()
-            response = self.client.post(f'/delete-review/{review.id}', follow_redirects=True)
+            # Update URL
+            response = self.client.post(f'/admin/delete-review/{review.id}', follow_redirects=True)  # Changed from '/delete-review'
             self.assertEqual(response.status_code, 200)
             self.assertIn(b'Review deleted successfully', response.data)
 
@@ -247,8 +251,8 @@ class FlaskAppTests(unittest.TestCase):
             db.session.add(pending)
             db.session.commit()
 
-        # Test viewing pending reviews
-        response = self.client.get('/pending-reviews')
+        # Test viewing pending reviews - Update URL
+        response = self.client.get('/admin/pending-reviews')  # Changed from '/pending-reviews'
         self.assertEqual(response.status_code, 200)
 
     def test_review_actions(self):

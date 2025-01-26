@@ -62,12 +62,12 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-6">
-                                        <a href="{{ url_for('edit_review', review_id=review.id) }}" 
+                                        <a href="{{ url_for('admin_edit_review', review_id=review.id) }}" 
                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 px-4">
                                             <i class="bi bi-pencil mr-1"></i>Edit
                                         </a>
                                         <form method="POST" 
-                                              action="{{ url_for('delete_review', review_id=review.id) }}" 
+                                              action="{{ url_for('admin_delete_review', review_id=review.id) }}" 
                                               class="inline"
                                               id="deleteForm-{{ review.id }}">
                                             <button type="button" 
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="mt-8 text-center">
-                    <a href="{{ url_for('admin_dashboard') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                    <a href="{{ url_for('admin_manage_reviews') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                         <i class="bi bi-arrow-left mr-1"></i>Back to Dashboard
                     </a>
                 </div>
@@ -258,7 +258,7 @@ function handleSeedVotes() {
     });
 }
 
-// Update the click handler to include the seed action
+// Update the click handler to include the seed action and keyboard support
 document.addEventListener('DOMContentLoaded', function() {
     const confirmButton = document.getElementById('confirmAction');
     const oldConfirmButton = confirmButton.cloneNode(true);
@@ -272,6 +272,20 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (currentAction === 'delete' && currentFormId) {
             document.getElementById(`deleteForm-${currentFormId}`).submit();
             hideConfirmModal();
+        }
+    });
+
+    // Add keyboard support for Enter key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('confirmModal').classList.contains('hidden')) {
+            if (currentAction === 'reset') {
+                handleResetVotes();
+            } else if (currentAction === 'seed') {
+                handleSeedVotes();
+            } else if (currentAction === 'delete' && currentFormId) {
+                document.getElementById(`deleteForm-${currentFormId}`).submit();
+                hideConfirmModal();
+            }
         }
     });
 });

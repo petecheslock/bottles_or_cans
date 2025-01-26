@@ -7,9 +7,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from captcha.image import ImageCaptcha
 import base64
 from io import BytesIO
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bottles_or_cans.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///bottles_or_cans.db')
 app.config['SQLALCHEMY_TRACK_CHANGES'] = False
 app.config['SECRET_KEY'] = '0ef430d376ef2a44e9f946682eb16ac1'
 db = SQLAlchemy(app)
@@ -149,32 +150,31 @@ def admin_logout():
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
-@app.route('/manage-reviews')
+@app.route('/admin/manage-reviews')
 @login_required
-def manage_reviews():
-    # Get all reviews ordered by creation date (newest first)
+def admin_manage_reviews():
     reviews = Review.query.order_by(Review.created_at.desc()).all()
     return render_template('manage_reviews.html', reviews=reviews)
 
-@app.route('/delete-review/<int:review_id>', methods=['POST'])
+@app.route('/admin/delete-review/<int:review_id>', methods=['POST'])
 @login_required
-def delete_review(review_id):
+def admin_delete_review(review_id):
     review = Review.query.get_or_404(review_id)
     db.session.delete(review)
     db.session.commit()
     flash('Review deleted successfully!', 'success')
-    return redirect(url_for('manage_reviews'))
+    return redirect(url_for('admin_manage_reviews'))
 
-@app.route('/edit-review/<int:review_id>', methods=['GET', 'POST'])
+@app.route('/admin/edit-review/<int:review_id>', methods=['GET', 'POST'])
 @login_required
-def edit_review(review_id):
+def admin_edit_review(review_id):
     review = Review.query.get_or_404(review_id)
     
     if request.method == 'POST':
         review.text = request.form.get('review_text')
         db.session.commit()
         flash('Review updated successfully!', 'success')
-        return redirect(url_for('manage_reviews'))
+        return redirect(url_for('admin_manage_reviews'))
     
     return render_template('edit_review.html', review=review)
 
@@ -361,11 +361,23 @@ def submit_review():
                          captcha_image=captcha_image,
                          is_admin=is_admin)
 
-@app.route('/pending-reviews')
+@app.route('/admin/pending-reviews', methods=['GET', 'POST'])
 @login_required
 def pending_reviews():
-    pending = PendingReview.query.filter_by(status='pending').order_by(PendingReview.created_at.desc()).all()
-    return render_template('pending_reviews.html', pending_reviews=pending)
+    if request.method == 'POST':
+        review_id = request.form.get('review_id')
+        action = request.form.get('action')
+        
+        if review_id and action == 'reject':
+            review = PendingReview.query.get_or_404(review_id)
+            review.status = 'rejected'
+            db.session.commit()
+            flash('Review rejected successfully.', 'success')
+            return redirect(url_for('pending_reviews'))
+    
+    # GET request handling
+    pending_reviews = PendingReview.query.filter_by(status='pending').order_by(PendingReview.created_at.desc()).all()
+    return render_template('pending_reviews.html', pending_reviews=pending_reviews)
 
 @app.route('/review-action/<int:review_id>/<action>', methods=['POST'])
 @login_required
@@ -480,6 +492,4 @@ def refresh_captcha():
     })
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # This creates all tables that don't exist yet
     app.run(debug=True) 

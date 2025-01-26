@@ -66,15 +66,11 @@
                                                 </button>
                                             </form>
                                         {% endif %}
-                                        <form method="POST" class="inline">
-                                            <input type="hidden" name="ip_address" value="{{ rate_limit.ip_address }}">
-                                            <input type="hidden" name="action" value="delete">
-                                            <button type="submit" 
-                                                    onclick="return confirm('Are you sure you want to delete this rate limit record?')"
-                                                    class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
-                                                <i class="bi bi-trash mr-1"></i>Delete
-                                            </button>
-                                        </form>
+                                        <button type="button" 
+                                                onclick="showDeleteConfirmation('{{ rate_limit.ip_address }}')"
+                                                class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
+                                            <i class="bi bi-trash mr-1"></i>Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -92,4 +88,55 @@
         </div>
     </div>
 </div>
+
+{% include 'components/confirm_modal.html' %}
+
+<script>
+function showDeleteConfirmation(ipAddress) {
+    // First show the modal
+    showConfirmModal(
+        ipAddress,
+        'delete',
+        'Confirm Delete',
+        `Are you sure you want to delete the rate limit record for ${ipAddress}?`
+    );
+
+    // Wait for a brief moment to ensure modal is rendered
+    setTimeout(() => {
+        // Get modal elements with error checking
+        const modalConfirm = document.getElementById('confirmAction');
+        if (!modalConfirm) {
+            console.error('Could not find confirm button');
+            return;
+        }
+
+        // Clone and replace the confirm button
+        const newModalConfirm = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
+
+        // Add the click handler
+        newModalConfirm.addEventListener('click', function() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ url_for('manage_rate_limits') }}";
+            form.innerHTML = `
+                <input type="hidden" name="ip_address" value="${ipAddress}">
+                <input type="hidden" name="action" value="delete">
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        });
+
+        // Add keyboard support
+        function handleKeyPress(e) {
+            if (e.key === 'Enter' && !document.getElementById('confirmModal').classList.contains('hidden')) {
+                newModalConfirm.click();
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyPress);
+    }, 100);
+}
+</script>
 {% endblock %} 

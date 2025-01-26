@@ -2,3 +2,8 @@ __pycache__
 .venv
 instance/bottles_or_cans.db
 node_modules
+
+# Coverage files
+.coverage
+coverage.xml
+htmlcov/

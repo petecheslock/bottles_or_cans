@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash
 from app.services.review import ReviewService
+from app.services.captcha import CaptchaService
 from app.utils.decorators import login_required
 
 bp = Blueprint('main', __name__)
@@ -49,9 +50,21 @@ def vote():
         'wine_percentage': wine_percentage
     })
 
-@bp.route('/submit-review', methods=['POST'])
+@bp.route('/submit-review', methods=['GET', 'POST'])
 def submit_review():
     """Handle submission of a new review"""
+    # For GET requests, display the form
+    if request.method == 'GET':
+        # Generate captcha if user is not admin
+        if not session.get('logged_in'):
+            captcha_image, captcha_text = CaptchaService.generate_captcha()
+            session['captcha_text'] = captcha_text  # Store the correct answer in session
+            return render_template('submit_review.html', 
+                                 captcha_image=captcha_image,
+                                 is_admin=False)
+        return render_template('submit_review.html', is_admin=True)
+
+    # For POST requests, handle the submission
     review_text = request.form.get('review_text')
     captcha_answer = request.form.get('captcha_answer')
     
@@ -63,7 +76,33 @@ def submit_review():
             return redirect(url_for('admin.manage_reviews'))
     else:
         # Handle non-admin submission with captcha and rate limiting
-        if review_text and captcha_answer:
-            ReviewService.create_pending_review(review_text)
-            flash('Review submitted successfully!', 'success')
-    return redirect(url_for('main.play_game')) 
+        if not review_text:
+            flash('Review text is required', 'error')
+            return redirect(url_for('main.submit_review'))
+            
+        if not captcha_answer:
+            flash('Please complete the captcha', 'error')
+            return redirect(url_for('main.submit_review'))
+            
+        # Verify captcha
+        stored_captcha = session.get('captcha_text')
+        if not stored_captcha or captcha_answer.lower() != stored_captcha.lower():
+            flash('Invalid captcha answer', 'error')
+            return redirect(url_for('main.submit_review'))
+            
+        # Clear used captcha
+        session.pop('captcha_text', None)
+        
+        ReviewService.create_pending_review(review_text)
+        flash('Review submitted successfully! It will be reviewed by an admin.', 'success')
+        
+    return redirect(url_for('main.play_game'))
+
+@bp.route('/refresh-captcha', methods=['POST'])
+def refresh_captcha():
+    """Generate a new captcha image"""
+    if not session.get('logged_in'):  # Only for non-admin users
+        captcha_image, captcha_text = CaptchaService.generate_captcha()
+        session['captcha_text'] = captcha_text
+        return jsonify({'captcha_image': captcha_image})
+    return jsonify({'error': 'Unauthorized'}), 401 

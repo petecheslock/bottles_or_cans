@@ -1,70 +1,134 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-3xl mx-auto">
-        {% if review %}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 mb-8 animate__animated animate__fadeIn">
-                <div class="text-xl text-gray-800 dark:text-gray-200 mb-8 text-center">
-                    "{{ review.text }}"
-                </div>
+{% include 'components/typing_animation.html' %}
 
-                <div class="flex justify-center space-x-4">
-                    <button onclick="submitVote('{{ review.id }}', 'headphones')"
-                            class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full 
-                                   hover:-translate-y-0.5 transition-all duration-300">
-                        <i class="bi bi-headphones mr-2"></i>Headphones
-                    </button>
-                    <button onclick="submitVote('{{ review.id }}', 'wine')"
-                            class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full 
-                                   hover:-translate-y-0.5 transition-all duration-300">
-                        <i class="fa-solid fa-wine-bottle mr-2"></i>Wine
-                    </button>
-                </div>
+<div class="container mx-auto px-4 mt-12">
+   {% if review %}
+       <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
+           <!-- Review Text Section - Keep original padding -->
+           <div class="p-8 border-b border-gray-200 dark:border-gray-700">
+               <div class="max-w-xl mx-auto text-xl italic text-gray-800 dark:text-gray-200 p-4 mb-2 bg-gray-50 dark:bg-gray-700 rounded-lg relative">
+                   <!-- Measurement div - match styling but remove bottom padding -->
+                   <div id="measureText" class="font-mono whitespace-pre-wrap leading-relaxed invisible absolute top-0 left-0 right-0 pt-4 px-4">{{ review.text }}</div>
+                   <!-- Actual text container - add small negative margin to tighten spacing -->
+                   <p id="reviewText" class="font-mono whitespace-pre-wrap leading-relaxed -mb-1"></p>
+               </div>
+           </div>
 
-                <div id="results" class="mt-8 hidden animate__animated animate__fadeIn">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-gray-700 dark:text-gray-300">Headphones</span>
-                        <span id="headphones-percentage" class="text-gray-700 dark:text-gray-300">{{ headphones_percentage }}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div id="headphones-bar" 
-                             class="bg-purple-600 h-2.5 rounded-full transition-all duration-500"
-                             style="width: {{ headphones_percentage }}%">
-                        </div>
-                    </div>
+           <!-- Voting Section - Reduced top padding -->
+           <div class="p-8 pt-3">
+               <div class="vote-buttons {% if has_voted %}hidden{% endif %} text-center">
+                   <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-4">What type of review is this?</h3>
+                   <div class="flex justify-center gap-6">
+                       <button id="headphonesBtn" 
+                               onclick="submitVote('headphones')" 
+                               disabled
+                               class="px-8 py-3 bg-gray-400 dark:bg-gray-600 text-white rounded-full transition-all duration-500 min-w-[150px] disabled:cursor-not-allowed disabled:hover:transform-none">
+                           <i class="bi bi-headphones text-2xl mr-2"></i><span class="text-xl">Cans</span>
+                       </button>
+                       <button id="wineBtn" 
+                               onclick="submitVote('wine')" 
+                               disabled
+                               class="px-8 py-3 bg-gray-400 dark:bg-gray-600 text-white rounded-full transition-all duration-500 min-w-[150px] disabled:cursor-not-allowed disabled:hover:transform-none">
+                           <i class="fa-solid fa-wine-bottle text-2xl mr-2"></i><span class="text-xl">Bottles</span>
+                       </button>
+                   </div>
+               </div>
 
-                    <div class="flex justify-between items-center mb-2 mt-4">
-                        <span class="text-gray-700 dark:text-gray-300">Wine</span>
-                        <span id="wine-percentage" class="text-gray-700 dark:text-gray-300">{{ wine_percentage }}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div id="wine-bar" 
-                             class="bg-red-600 h-2.5 rounded-full transition-all duration-500"
-                             style="width: {{ wine_percentage }}%">
-                        </div>
-                    </div>
+               <div class="vote-results {% if has_voted %}block{% else %}hidden{% endif %} p-6 rounded-lg mt-4">
+                   <div class="text-center mb-4">
+                       <a href="{{ url_for('main.index') }}" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">
+                           <i class="bi bi-arrow-right-circle mr-2"></i>Play Again
+                       </a>
+                   </div>
 
-                    <div class="text-center mt-8">
-                        <a href="{{ url_for('main.play_game') }}" 
-                           class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full 
-                                  hover:-translate-y-0.5 transition-all duration-300 inline-block">
-                            <i class="bi bi-arrow-repeat mr-2"></i>Next Review
-                        </a>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="text-center text-gray-600 dark:text-gray-400">
-                No reviews available at the moment.
-            </div>
-        {% endif %}
-    </div>
+                   <h3 class="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">What Others Thought</h3>
+                   <div class="mb-6">
+                       <div class="flex justify-between mb-2">
+                           <label class="text-gray-700 dark:text-gray-300">
+                               <i class="bi bi-headphones mr-2"></i>Cans (Headphones)
+                           </label>
+                           <span class="headphones-percentage text-gray-900 dark:text-white">0%</span>
+                       </div>
+                       <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                           <div class="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                       </div>
+                   </div>
+                   <div class="mb-6">
+                       <div class="flex justify-between mb-2">
+                           <label class="text-gray-700 dark:text-gray-300">
+                               <i class="fa-solid fa-wine-bottle mr-2"></i>Bottles (Wine)
+                           </label>
+                           <span class="wine-percentage text-gray-900 dark:text-white">0%</span>
+                       </div>
+                       <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                           <div class="h-full bg-red-600 dark:bg-red-500 transition-all duration-1000" style="width: 0%"></div>
+                       </div>
+                   </div>
+                   
+                   <div class="text-center mt-4">
+                       <a href="{{ url_for('main.submit_review') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                           <i class="bi bi-pencil mr-1"></i>Submit your own review
+                       </a>
+                   </div>
+               </div>
+           </div>
+       </div>
+   {% else %}
+       <div class="max-w-2xl mx-auto bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 p-4 rounded-lg">
+           <i class="bi bi-info-circle mr-2"></i>No reviews available.
+       </div>
+   {% endif %}
 </div>
 
 <script>
-function submitVote(reviewId, voteType) {
-    fetch('/vote', {
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewText = {{ review.text|tojson|safe }};
+    const measureDiv = document.getElementById('measureText');
+    const textContainer = document.getElementById('reviewText');
+    const headphonesBtn = document.getElementById('headphonesBtn');
+    const wineBtn = document.getElementById('wineBtn');
+    
+    // Force a layout calculation
+    void measureDiv.offsetHeight;
+    
+    // Set both min-height and height to ensure proper sizing
+    const measuredHeight = measureDiv.offsetHeight;
+    textContainer.style.minHeight = measuredHeight + 'px';
+    textContainer.style.height = measuredHeight + 'px';
+    
+    // Remove the measurement div
+    measureDiv.remove();
+    
+    typeText(reviewText, 'reviewText', function() {
+        // Enable buttons and transition to their colors
+        headphonesBtn.disabled = false;
+        wineBtn.disabled = false;
+        
+        // Add transition classes first
+        headphonesBtn.classList.add('hover:-translate-y-0.5', 'hover:bg-blue-700');
+        wineBtn.classList.add('hover:-translate-y-0.5', 'hover:bg-red-700');
+        
+        // Trigger color transition
+        requestAnimationFrame(() => {
+            headphonesBtn.classList.remove('bg-gray-400', 'dark:bg-gray-600');
+            headphonesBtn.classList.add('bg-blue-600', 'dark:bg-blue-600');
+            
+            wineBtn.classList.remove('bg-gray-400', 'dark:bg-gray-600');
+            wineBtn.classList.add('bg-red-600', 'dark:bg-red-600');
+        });
+    });
+});
+
+function submitVote(voteType) {
+    const voteButtons = document.querySelector('.vote-buttons');
+    const voteResults = document.querySelector('.vote-results');
+    const reviewId = '{{ review.id }}';
+
+    voteButtons.style.opacity = '0';
+    
+    fetch('{{ url_for("main.vote") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -73,19 +137,24 @@ function submitVote(reviewId, voteType) {
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('headphones-percentage').textContent = `${data.headphones_percentage}%`;
-        document.getElementById('wine-percentage').textContent = `${data.wine_percentage}%`;
-        
-        document.getElementById('headphones-bar').style.width = `${data.headphones_percentage}%`;
-        document.getElementById('wine-bar').style.width = `${data.wine_percentage}%`;
-        
-        document.getElementById('results').classList.remove('hidden');
-        
-        // Disable vote buttons
-        document.querySelectorAll('button').forEach(button => {
-            button.disabled = true;
-            button.classList.add('opacity-50', 'cursor-not-allowed');
-        });
+        setTimeout(() => {
+            voteButtons.style.display = 'none';
+            voteResults.style.display = 'block';
+            voteResults.classList.add('animate__animated', 'animate__fadeIn');
+            
+            setTimeout(() => {
+                const headphonesBar = voteResults.querySelector('.bg-blue-600.dark\\:bg-blue-500');
+                const wineBar = voteResults.querySelector('.bg-red-600.dark\\:bg-red-500');
+                const headphonesPercentage = voteResults.querySelector('.headphones-percentage');
+                const winePercentage = voteResults.querySelector('.wine-percentage');
+                
+                headphonesBar.style.width = `${data.headphones_percentage}%`;
+                headphonesPercentage.textContent = `${data.headphones_percentage}%`;
+                
+                wineBar.style.width = `${data.wine_percentage}%`;
+                winePercentage.textContent = `${data.wine_percentage}%`;
+            }, 100);
+        }, 500);
     });
 }
 </script>

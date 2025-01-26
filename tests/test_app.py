@@ -1,7 +1,5 @@
 import unittest
 import os
-os.environ['DATABASE_URL'] = 'sqlite:///test.db'
-
 from app import app, db, User, Review, PendingReview, RateLimit
 from datetime import datetime, timezone
 import json
@@ -9,9 +7,9 @@ from base64 import b64decode
 
 class FlaskAppTests(unittest.TestCase):
     def setUp(self):
-        # Configure app for testing
+        # Configure app for testing with in-memory database
         app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # Change to in-memory database
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.config['SECRET_KEY'] = 'test_secret_key'
         app.config['WTF_CSRF_ENABLED'] = False

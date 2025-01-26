@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'components/typing_animation.html' %}
+
+<div class="container mx-auto px-4 mt-12">
+    <div class="max-w-4xl mx-auto space-y-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Text Display Test Cases</h1>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">This page tests various review lengths and formats to ensure proper container sizing and animation.</p>
+        </div>
+
+        {% for review in test_reviews %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Test Case: {{ review.description }}
+                </h2>
+            </div>
+            
+            <!-- Review Text Section -->
+            <div class="p-8 border-b border-gray-200 dark:border-gray-700">
+                <div class="max-w-xl mx-auto text-xl italic text-gray-800 dark:text-gray-200 p-4 mb-2 bg-gray-50 dark:bg-gray-700 rounded-lg relative">
+                    <div id="measureText{{ loop.index }}" class="font-mono whitespace-pre-wrap leading-relaxed invisible absolute top-0 left-0 right-0 pt-4 px-4">{{ review.text }}</div>
+                    <p id="reviewText{{ loop.index }}" class="font-mono whitespace-pre-wrap leading-relaxed -mb-1"></p>
+                </div>
+            </div>
+            
+            <!-- Debug Info -->
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 text-sm">
+                <p class="text-gray-600 dark:text-gray-400">
+                    Character count: {{ review.text|length }}
+                </p>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Line count: <span id="lineCount{{ loop.index }}">Calculating...</span>
+                </p>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Container height: <span id="containerHeight{{ loop.index }}">Measuring...</span>
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for review in test_reviews %}
+        initializeReview(
+            {{ review.text|tojson|safe }},
+            {{ loop.index }},
+            'measureText{{ loop.index }}',
+            'reviewText{{ loop.index }}'
+        );
+    {% endfor %}
+});
+
+function initializeReview(reviewText, index, measureId, textId) {
+    const measureDiv = document.getElementById(measureId);
+    const textContainer = document.getElementById(textId);
+    
+    // Force a layout calculation
+    void measureDiv.offsetHeight;
+    
+    // Set both min-height and height to ensure proper sizing
+    const measuredHeight = measureDiv.offsetHeight;
+    textContainer.style.minHeight = measuredHeight + 'px';
+    textContainer.style.height = measuredHeight + 'px';
+    
+    // Update debug info
+    document.getElementById(`lineCount${index}`).textContent = 
+        Math.round(measuredHeight / parseInt(getComputedStyle(measureDiv).lineHeight));
+    document.getElementById(`containerHeight${index}`).textContent = 
+        `${measuredHeight}px`;
+    
+    // Remove the measurement div
+    measureDiv.remove();
+    
+    // Start typing animation
+    typeText(reviewText, textId);
+}
+</script>
+{% endblock %} 

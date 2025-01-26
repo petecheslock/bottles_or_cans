@@ -491,5 +491,33 @@ def refresh_captcha():
         'captcha_image': captcha_image
     })
 
+@app.route('/admin/test-text-display')
+@login_required
+def test_text_display():
+    # Test cases with different lengths and characteristics
+    test_reviews = [
+        {
+            "text": "Short review.",
+            "description": "Very short review"
+        },
+        {
+            "text": "This is a medium length review that should fit comfortably in the container without any issues.",
+            "description": "Medium length review"
+        },
+        {
+            "text": "This is a longer review with multiple sentences. It includes some punctuation marks, which affect typing speed. The container should adjust properly to fit all this text without any visual issues.",
+            "description": "Long review with multiple sentences"
+        },
+        {
+            "text": "A very long review that goes into great detail. It contains multiple paragraphs.\n\nThe second paragraph adds significant height. There are also some very long sentences that might wrap multiple times depending on the screen width.\n\nFinally, a third paragraph to really test the limits of the container sizing.",
+            "description": "Multi-paragraph review"
+        },
+        {
+            "text": "Edge case with lots of punctuation... !!! ??? ,,, ;;; ::: Testing how the timing and container handles unusual punctuation patterns!?!?!",
+            "description": "Review with heavy punctuation"
+        }
+    ]
+    return render_template('test_text_display.html', test_reviews=test_reviews)
+
 if __name__ == '__main__':
     app.run(debug=True) 

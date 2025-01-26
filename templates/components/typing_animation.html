@@ -33,7 +33,7 @@ function typeText(text, elementId, onComplete = null) {
     const cursor = document.createElement('span');
     cursor.className = 'typing-cursor';
     element.appendChild(cursor);
-    
+
     let index = 0;
     const EARLY_TRIGGER = 0.8; // Enable buttons when 80% done
     const triggerPoint = Math.floor(text.length * EARLY_TRIGGER);
@@ -59,6 +59,13 @@ function typeText(text, elementId, onComplete = null) {
                 setTimeout(type, delay + TYPING_CONFIG.clausePause);
             } else {
                 setTimeout(type, delay);
+            }
+        } else {
+            // Remove cursor after typing is complete
+            cursor.remove();
+            // Call onComplete if it wasn't called early
+            if (index !== triggerPoint && onComplete) {
+                onComplete();
             }
         }
     }

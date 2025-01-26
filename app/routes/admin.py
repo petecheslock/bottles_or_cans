@@ -78,6 +78,11 @@ def manage_rate_limits():
         elif action == 'block':
             RateLimitService.block_ip(ip_address)
             flash('IP address blocked successfully.', 'success')
+        elif action == 'delete':
+            if RateLimitService.delete_rate_limit(ip_address):
+                flash('Rate limit record deleted successfully.', 'success')
+            else:
+                flash('Rate limit record not found.', 'danger')
     
     rate_limits = RateLimitService.get_all_rate_limits()
     return render_template('rate_limits.html', rate_limits=rate_limits)
@@ -115,29 +120,29 @@ def test_text_display():
     ]
     return render_template('test_text_display.html', test_reviews=test_reviews)
 
-@admin_bp.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        user = User.query.filter_by(username=username).first()
-        
-        if user and user.check_password(password):
-            session['user_id'] = user.id
-            flash('Logged in successfully', 'success')
-            return redirect(url_for('admin.dashboard'))
-        else:
-            flash('Invalid credentials', 'danger')
-            
-    return render_template('admin_login.html')
-
 @admin_bp.route('/reset-votes/<int:review_id>', methods=['POST'])
 @login_required
 def reset_votes(review_id):
-    """Reset the votes for a specific review"""
-    ReviewService.reset_votes(review_id)
-    return jsonify({'success': True})
+    """Reset votes for a specific review"""
+    if ReviewService.reset_votes(review_id):
+        flash('Votes reset successfully!', 'success')
+    else:
+        flash('Review not found.', 'error')
+    return redirect(url_for('admin.manage_reviews'))
+
+@admin_bp.route('/reset-all-votes', methods=['POST'])
+@login_required
+def reset_all_votes():
+    """Reset votes for all reviews"""
+    try:
+        reviews = Review.query.all()
+        for review in reviews:
+            review.votes_headphones = 0
+            review.votes_wine = 0
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 @admin_bp.route('/seed-reviews', methods=['POST'])
 @login_required

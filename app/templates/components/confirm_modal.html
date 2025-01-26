@@ -22,30 +22,19 @@
 </style>
 
 <!-- The Modal -->
-<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <!-- Add click handler to the overlay -->
-    <div class="absolute inset-0" onclick="hideConfirmModal()"></div>
-    
-    <!-- Stop propagation on the modal content -->
-    <div class="relative w-full max-w-md px-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full animate__quickZoom" 
-             onclick="event.stopPropagation()">
-            <div class="p-6">
-                <h3 id="modalTitle" class="text-xl font-semibold mb-4 text-gray-900 dark:text-white"></h3>
-                <div id="modalMessage" class="text-gray-600 dark:text-gray-400 mb-6"></div>
-                <div class="flex justify-end space-x-4">
-                    <button type="button" 
-                            onclick="hideConfirmModal()"
-                            class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-300">
-                        Cancel
-                    </button>
-                    <button type="button" 
-                            id="confirmAction"
-                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-300">
-                        Confirm
-                    </button>
-                </div>
-            </div>
+<div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
+        <h2 id="modalTitle" class="text-2xl font-bold mb-4 text-gray-900 dark:text-white"></h2>
+        <div id="modalMessage" class="text-gray-700 dark:text-gray-300 mb-6"></div>
+        <div class="flex justify-end space-x-4">
+            <button onclick="hideConfirmModal()" 
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
+                Cancel
+            </button>
+            <button id="confirmAction"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
+                Confirm
+            </button>
         </div>
     </div>
 </div>

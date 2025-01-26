@@ -83,14 +83,21 @@ class ReviewService:
         """Get all reviews from the database"""
         return Review.query.all()
 
-    @classmethod
-    def reset_votes(cls, review_id):
-        """Reset votes for a review to zero"""
-        review = Review.query.get_or_404(review_id)
-        review.votes_headphones = 0
-        review.votes_wine = 0
-        db.session.commit()
-        return review
+    @staticmethod
+    def get_review(review_id):
+        """Get a specific review by ID"""
+        return Review.query.get(review_id)
+
+    @staticmethod
+    def reset_votes(review_id):
+        """Reset votes for a specific review"""
+        review = ReviewService.get_review(review_id)
+        if review:
+            review.votes_headphones = 0
+            review.votes_wine = 0
+            db.session.commit()
+            return True
+        return False
 
     @classmethod
     def get_pending_reviews(cls):

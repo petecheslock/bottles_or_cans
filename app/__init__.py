@@ -2,6 +2,9 @@ from flask import Flask, url_for, get_flashed_messages
 from app.extensions import init_extensions, db
 from app.config import DevelopmentConfig, TestingConfig, ProductionConfig
 import os
+from app.routes.auth import auth_bp
+from app.routes.admin import admin_bp
+from app.routes.main import bp as main_bp
 
 def create_app(config_object=None):
     """Application factory function."""
@@ -30,7 +33,9 @@ def create_app(config_object=None):
     init_extensions(app)
     
     # Register blueprints
-    register_blueprints(app)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(main_bp)
     
     # Create tables
     with app.app_context():

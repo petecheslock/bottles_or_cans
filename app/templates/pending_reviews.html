@@ -42,16 +42,15 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-start">
-                                            <form method="POST" action="{{ url_for('admin.review_action', review_id=review.id, action='approve') }}" class="mr-8">
+                                            <form method="POST" action="{{ url_for('admin.approve_pending', review_id=review.id) }}" class="mr-8">
                                                 <button type="submit" 
                                                         class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 px-4">
                                                     <i class="bi bi-check-circle mr-1"></i>Approve
                                                 </button>
                                             </form>
-                                            <form method="POST" action="{{ url_for('admin.pending_reviews') }}" class="inline" id="rejectForm-{{ review.id }}">
-                                                <button type="button" 
-                                                        onclick="showRejectConfirmation({{ review.id }})"
-                                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 px-4">
+                                            <form method="POST" action="{{ url_for('admin.reject_pending', review_id=review.id) }}" class="inline" id="rejectForm-{{ review.id }}">
+                                                <button type="submit" 
+                                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
                                                     <i class="bi bi-x-circle mr-1"></i>Reject
                                                 </button>
                                             </form>
@@ -72,7 +71,7 @@
                 {% endif %}
 
                 <div class="mt-8 text-center">
-                    <a href="{{ url_for('admin.admin_dashboard') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                    <a href="{{ url_for('admin.dashboard') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                         <i class="bi bi-arrow-left mr-1"></i>Back to Dashboard
                     </a>
                 </div>

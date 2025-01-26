@@ -142,29 +142,26 @@ class FlaskAppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_rate_limiting(self):
-        # Create initial rate limit record
+        """Test rate limiting functionality"""
+        # Create a test rate limit
         rate_limit = RateLimit(
             ip_address='127.0.0.1',
-            endpoint='test_endpoint',
-            timestamp=datetime.now(timezone.utc)
+            count=1,
+            last_request=datetime.utcnow()
         )
         db.session.add(rate_limit)
         db.session.commit()
 
-        # Test rate limiting service
-        self.assertTrue(
-            RateLimitService.check_rate_limit('127.0.0.1', 'test_endpoint')
-        )
-        
-        # Test blocking
-        RateLimitService.block_ip('127.0.0.1')
-        rate_limit = RateLimit.query.filter_by(ip_address='127.0.0.1').first()
-        self.assertTrue(rate_limit.is_blocked)
-        
-        # Test unblocking
-        RateLimitService.unblock_ip('127.0.0.1')
-        rate_limit = RateLimit.query.filter_by(ip_address='127.0.0.1').first()
-        self.assertFalse(rate_limit.is_blocked)
+        # Test rate limit check
+        result = RateLimitService.check_rate_limit('127.0.0.1')
+        self.assertTrue(result)  # Should be under limit
+
+        # Test exceeding rate limit
+        rate_limit.count = 6  # Over default limit of 5
+        db.session.commit()
+
+        result = RateLimitService.check_rate_limit('127.0.0.1')
+        self.assertFalse(result)  # Should be over limit
 
     def test_review_service(self):
         # Test creating review

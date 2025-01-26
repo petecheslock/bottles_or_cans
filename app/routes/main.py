@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from app.services.review import ReviewService
 from app.services.captcha import CaptchaService
 from app.utils.decorators import login_required
+from app.services.rate_limit import RateLimitService
 
 bp = Blueprint('main', __name__)
 
@@ -64,7 +65,15 @@ def submit_review():
                                  is_admin=False)
         return render_template('submit_review.html', is_admin=True)
 
-    # For POST requests, handle the submission
+    # For POST requests, check rate limit first
+    ip_address = request.remote_addr
+    if not RateLimitService.check_rate_limit(ip_address, limit=5, window=3600):
+        flash('Too many submissions. Please try again later.', 'danger')
+        return render_template('submit_review.html', 
+                             captcha_image=session.get('captcha_image'),
+                             is_admin=session.get('logged_in', False))
+
+    # Handle the submission
     review_text = request.form.get('review_text')
     captcha_answer = request.form.get('captcha_answer')
     
@@ -73,7 +82,7 @@ def submit_review():
         if review_text:
             ReviewService.create_review(review_text)
             flash('Review added successfully!', 'success')
-            return redirect(url_for('admin.manage_reviews'))  # Admin stays in admin area
+            return redirect(url_for('admin.dashboard'))  # Changed to admin.dashboard to match blueprint
     else:
         # Handle non-admin submission
         if not review_text:
@@ -94,7 +103,7 @@ def submit_review():
         session.pop('captcha_text', None)
         
         ReviewService.create_pending_review(review_text)
-        return render_template('submit_thanks.html', is_admin=False)  # Only regular users see thank you page
+        return render_template('submit_thanks.html', is_admin=False)
     
     return redirect(url_for('main.submit_review'))
 

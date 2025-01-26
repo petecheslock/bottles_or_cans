@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from functools import wraps
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
 from captcha.image import ImageCaptcha
-import string
 import base64
 from io import BytesIO
 
@@ -248,33 +247,55 @@ def generate_image_captcha():
 
 # Update the rate limiting helper function to check for admin status
 def check_rate_limit(ip_address, limit_minutes=30):
+    # Skip rate limiting for admins
     if session.get('logged_in') and session.get('user_id'):
         user = User.query.get(session.get('user_id'))
         if user and user.is_admin:
             return True
 
     rate_limit = RateLimit.query.filter_by(ip_address=ip_address).first()
+    current_time = datetime.now(timezone.utc)
     
     if not rate_limit:
-        rate_limit = RateLimit(ip_address=ip_address)
+        # First attempt
+        rate_limit = RateLimit(
+            ip_address=ip_address,
+            attempt_count=1,
+            last_attempt=current_time
+        )
         db.session.add(rate_limit)
-    else:
-        if rate_limit.is_blocked:
-            return False
-            
-        if rate_limit.is_rate_limited():
-            rate_limit.attempt_count += 1
-            if rate_limit.attempt_count >= 5:
-                rate_limit.is_blocked = True
-                db.session.commit()
-                return False
-        else:
-            # Reset counter if outside time window
-            rate_limit.attempt_count = 1
-            rate_limit.last_attempt = datetime.now(timezone.utc)
+        db.session.commit()
+        return True
+        
+    # Check if blocked
+    if rate_limit.is_blocked:
+        return False
+        
+    # Ensure last_attempt is timezone-aware
+    if rate_limit.last_attempt.tzinfo is None:
+        rate_limit.last_attempt = rate_limit.last_attempt.replace(tzinfo=timezone.utc)
+        
+    # Check if outside time window
+    time_diff = current_time - rate_limit.last_attempt
+    if time_diff.total_seconds() >= (limit_minutes * 60):
+        # Reset counter if outside time window
+        rate_limit.attempt_count = 1
+        rate_limit.last_attempt = current_time
+        db.session.commit()
+        return True
+        
+    # Increment attempt count
+    rate_limit.attempt_count += 1
+    rate_limit.last_attempt = current_time
     
+    # Check if should be blocked
+    if rate_limit.attempt_count >= 5:
+        rate_limit.is_blocked = True
+        db.session.commit()
+        return False
+        
     db.session.commit()
-    return rate_limit.attempt_count < 5
+    return True
 
 @app.route('/submit-review', methods=['GET', 'POST'])
 def submit_review():
@@ -412,14 +433,18 @@ class RateLimit(db.Model):
     is_blocked = db.Column(db.Boolean, default=False)
 
     def is_rate_limited(self):
-        # Ensure last_attempt is timezone-aware
+        # Always ensure last_attempt is timezone-aware
         if self.last_attempt.tzinfo is None:
-            last_attempt_utc = self.last_attempt.replace(tzinfo=timezone.utc)
-        else:
-            last_attempt_utc = self.last_attempt
+            self.last_attempt = self.last_attempt.replace(tzinfo=timezone.utc)
             
-        time_diff = datetime.now(timezone.utc) - last_attempt_utc
-        return time_diff.total_seconds() < (30 * 60)  # 30 minutes
+        time_diff = datetime.now(timezone.utc) - self.last_attempt
+        
+        # If more than 30 minutes have passed, not rate limited
+        if time_diff.total_seconds() >= (30 * 60):
+            return False
+        
+        # Rate limited if within time window and too many attempts
+        return self.attempt_count >= 5
 
 @app.route('/admin/rate-limits', methods=['GET', 'POST'])
 @login_required

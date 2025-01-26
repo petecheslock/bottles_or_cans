@@ -78,15 +78,12 @@ def play_game():
         headphones_percentage = 0
         wine_percentage = 0
     
-    # Get whether user has voted on this review from session
-    voted_reviews = session.get('voted_reviews', [])
-    has_voted = review.id in voted_reviews if review else False
-    
+    # Remove the session-based vote tracking
     return render_template('index.html', 
                          review=review, 
-                         has_voted=has_voted,
                          headphones_percentage=headphones_percentage,
-                         wine_percentage=wine_percentage)
+                         wine_percentage=wine_percentage,
+                         has_voted=False)  # Always set has_voted to False
 
 @app.route('/start')
 def start_game():

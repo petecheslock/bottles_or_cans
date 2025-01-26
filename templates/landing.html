@@ -5,21 +5,21 @@
     <div class="max-w-4xl mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
             <div class="p-8 text-center">
-                <h1 class="text-4xl font-bold mb-8 dark:text-white">Welcome to Bottles or Cans!</h1>
+                <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">Welcome to Bottles or Cans!</h1>
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
                     <div>
                         <div class="text-6xl mb-4">
-                            <i class="fa-solid fa-wine-bottle text-red-500"></i>
+                            <i class="fa-solid fa-wine-bottle text-red-500 dark:text-red-400"></i>
                         </div>
-                        <h3 class="text-2xl font-semibold">Bottles</h3>
-                        <p class="text-gray-500">(Wine Reviews)</p>
+                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Bottles</h3>
+                        <p class="text-gray-600 dark:text-gray-400">(Wine Reviews)</p>
                     </div>
                     <div>
                         <div class="text-6xl mb-4">
-                            <i class="bi bi-headphones text-blue-600"></i>
+                            <i class="bi bi-headphones text-blue-600 dark:text-blue-400"></i>
                         </div>
-                        <h3 class="text-2xl font-semibold">Cans</h3>
-                        <p class="text-gray-500">(Headphone Reviews)</p>
+                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Cans</h3>
+                        <p class="text-gray-600 dark:text-gray-400">(Headphone Reviews)</p>
                     </div>
                 </div>
 
@@ -28,16 +28,15 @@
                     Can you tell the difference between a wine review and a headphone review?
                 </p>
 
-
                 <div class="my-12">
-                    <h2 class="text-3xl font-bold mb-6">How to Play</h2>
-                    <p class="text-xl mb-4">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">How to Play</h2>
+                    <p class="text-xl text-gray-700 dark:text-gray-300 mb-4">
                         Read ambiguous reviews and guess: is it about wine (bottles) or headphones (cans)?
                     </p>
                 </div>
 
                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-12">
-                    <p class="italic text-lg dark:text-gray-200">
+                    <p class="italic text-lg text-gray-800 dark:text-gray-200">
                         "Rich and full-bodied with excellent depth. The bass notes are particularly impressive, 
                         with a smooth finish that lingers pleasantly."
                     </p>
@@ -47,7 +46,7 @@
                 </div>
 
                 <a href="{{ url_for('start_game') }}" 
-                   class="inline-flex items-center px-6 py-3 text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-full">
+                   class="inline-flex items-center px-6 py-3 text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-full hover:-translate-y-0.5 transition-all duration-300 animate__animated animate__pulse animate__infinite">
                     <i class="bi bi-play-fill mr-2"></i>Start Playing
                 </a>
             </div>

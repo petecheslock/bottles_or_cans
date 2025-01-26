@@ -2,51 +2,76 @@
 
 {% block content %}
 <div class="container mx-auto px-4 mt-12">
-   <h1 class="text-3xl font-bold mb-8">Pending Reviews</h1>
-   
-   {% with messages = get_flashed_messages(with_categories=true) %}
-       {% if messages %}
-           {% for category, message in messages %}
-               <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} flex justify-between items-center">
-                   {{ message }}
-                   <button type="button" class="text-lg font-semibold" onclick="this.parentElement.remove()">×</button>
-               </div>
-           {% endfor %}
-       {% endif %}
-   {% endwith %}
+    <div class="max-w-[90%] mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
+            <div class="p-8">
+                <h1 class="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">Pending Reviews</h1>
 
-   {% if pending_reviews %}
-       {% for review in pending_reviews %}
-           <div class="bg-white rounded-xl shadow-md mb-6 animate__animated animate__fadeIn">
-               <div class="p-6">
-                   <p class="text-lg italic text-gray-800 bg-gray-50 p-6 rounded-lg mb-6">{{ review.text }}</p>
-                   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                       <p class="text-sm text-gray-600">
-                           Submitted: {{ review.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
-                           {% if review.ip_address %}
-                               <br>IP: {{ review.ip_address }}
-                           {% endif %}
-                       </p>
-                       <div class="flex gap-3">
-                           <form action="{{ url_for('review_action', review_id=review.id, action='approve') }}" method="POST">
-                               <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:-translate-y-0.5 transition-all duration-300">
-                                   <i class="bi bi-check-circle mr-2"></i>Approve
-                               </button>
-                           </form>
-                           <form action="{{ url_for('review_action', review_id=review.id, action='reject') }}" method="POST">
-                               <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:-translate-y-0.5 transition-all duration-300">
-                                   <i class="bi bi-x-circle mr-2"></i>Reject
-                               </button>
-                           </form>
-                       </div>
-                   </div>
-               </div>
-           </div>
-       {% endfor %}
-   {% else %}
-       <div class="bg-blue-100 text-blue-700 p-4 rounded-lg">
-           <i class="bi bi-info-circle mr-2"></i>No pending reviews to moderate.
-       </div>
-   {% endif %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200{% elif category == 'danger' %}bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200{% else %}bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200{% endif %} flex justify-between items-center">
+                                {{ message }}
+                                <button type="button" class="text-lg font-semibold" onclick="this.parentElement.remove()">×</button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% if pending_reviews %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="w-[75%] px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Review</th>
+                                    <th class="w-[25%] px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                {% for review in pending_reviews %}
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-900 dark:text-gray-200">{{ review.text }}</div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">Submitted: {{ review.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-start">
+                                            <form method="POST" action="{{ url_for('review_action', review_id=review.id, action='approve') }}" class="mr-8">
+                                                <button type="submit" 
+                                                        class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 px-4">
+                                                    <i class="bi bi-check-circle mr-1"></i>Approve
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ url_for('review_action', review_id=review.id, action='reject') }}" class="inline">
+                                                <button type="submit" 
+                                                        onclick="return confirm('Are you sure you want to reject this review?')"
+                                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 px-4">
+                                                    <i class="bi bi-x-circle mr-1"></i>Reject
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <div class="text-5xl mb-4 text-gray-400 dark:text-gray-600">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400">No pending reviews at the moment.</p>
+                    </div>
+                {% endif %}
+
+                <div class="mt-8 text-center">
+                    <a href="{{ url_for('admin_dashboard') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                        <i class="bi bi-arrow-left mr-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -34,14 +34,6 @@
                 </button>
                 <div class="hidden lg:flex lg:items-center" id="navbarNav">
                     <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 items-center">
-                        <div class="flex items-center">
-                            <button id="darkModeToggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none bg-gray-200 dark:bg-blue-600">
-                                <span class="sr-only">Toggle dark mode</span>
-                                <span id="toggleCircle" class="inline-block w-4 h-4 transform transition-transform bg-white rounded-full translate-x-1 dark:translate-x-6"></span>
-                                <i class="bi bi-sun absolute left-1 text-yellow-500 dark:text-transparent"></i>
-                                <i class="bi bi-moon absolute right-1 text-transparent dark:text-white"></i>
-                            </button>
-                        </div>
                         <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('play_game') }}">
                             <i class="bi bi-controller mr-1"></i>Play
                         </a>
@@ -66,6 +58,16 @@
                                 <i class="bi bi-person mr-1"></i>Admin
                             </a>
                         {% endif %}
+                        
+                        <!-- Move dark mode toggle to the end with icons outside -->
+                        <div class="flex items-center gap-2 ml-4">
+                            <i class="bi bi-sun text-yellow-500 text-sm"></i>
+                            <button id="darkModeToggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none bg-gray-200 dark:bg-blue-600">
+                                <span class="sr-only">Toggle dark mode</span>
+                                <span id="toggleCircle" class="inline-block w-4 h-4 transform transition-transform bg-white rounded-full translate-x-1 dark:translate-x-6"></span>
+                            </button>
+                            <i class="fa-solid fa-moon text-gray-400 dark:text-white text-sm"></i>
+                        </div>
                     </div>
                 </div>
             </div>

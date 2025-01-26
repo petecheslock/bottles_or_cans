@@ -17,7 +17,16 @@
 </style>
 
 <script>
-function typeText(text, elementId, baseSpeed = 22) {
+// Centralized typing speed configuration
+const TYPING_CONFIG = {
+    baseSpeed: 20,          // Base milliseconds between characters
+    variation: 10,          // Random variation range (±10ms)
+    sentencePause: 100,     // Extra pause after .!?
+    clausePause: 50,        // Extra pause after ,;:
+    finalDelay: 300        // Delay before showing next content
+};
+
+function typeText(text, elementId, onComplete = null) {  // Make callback optional
     const element = document.getElementById(elementId);
     element.textContent = '';
     
@@ -32,21 +41,24 @@ function typeText(text, elementId, baseSpeed = 22) {
             cursor.insertAdjacentText('beforebegin', text.charAt(index));
             index++;
             
-            const variation = Math.random() * 22 - 11;
-            const delay = baseSpeed + variation;
+            const variation = Math.random() * TYPING_CONFIG.variation * 2 - TYPING_CONFIG.variation;
+            const delay = TYPING_CONFIG.baseSpeed + variation;
             
             const char = text.charAt(index - 1);
             if ('.!?'.includes(char)) {
-                setTimeout(type, delay + 100);
+                setTimeout(type, delay + TYPING_CONFIG.sentencePause);
             } else if (',;:'.includes(char)) {
-                setTimeout(type, delay + 50);
+                setTimeout(type, delay + TYPING_CONFIG.clausePause);
             } else {
                 setTimeout(type, delay);
+            }
+        } else {
+            // Only call onComplete if it was provided
+            if (onComplete) {
+                setTimeout(onComplete, TYPING_CONFIG.finalDelay);
             }
         }
     }
     type();
-    
-    return text.length * baseSpeed + 560;
 }
 </script> 

@@ -210,19 +210,14 @@ def reset_votes():
 def seed_reviews():
     try:
         reviews = Review.query.all()
-        
         for review in reviews:
-            if review.votes_headphones + review.votes_wine < 5:  # Only seed reviews with few votes
-                review.votes_headphones += random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
-                review.votes_wine += random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
-        
+            review.votes_headphones = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
+            review.votes_wine = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
         db.session.commit()
-        flash('Reviews seeded successfully!', 'success')
+        return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
-        flash('Error seeding reviews. Please try again.', 'danger')
-    
-    return redirect(url_for('manage_reviews'))
+        return jsonify({'success': False, 'message': str(e)})
 
 def generate_image_captcha():
     # Create image with custom settings

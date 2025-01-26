@@ -58,7 +58,7 @@ def submit_review():
         # Generate captcha if user is not admin
         if not session.get('logged_in'):
             captcha_image, captcha_text = CaptchaService.generate_captcha()
-            session['captcha_text'] = captcha_text  # Store the correct answer in session
+            session['captcha_text'] = captcha_text
             return render_template('submit_review.html', 
                                  captcha_image=captcha_image,
                                  is_admin=False)
@@ -68,14 +68,14 @@ def submit_review():
     review_text = request.form.get('review_text')
     captcha_answer = request.form.get('captcha_answer')
     
-    # If user is logged in as admin, bypass captcha and rate limiting
+    # If user is logged in as admin, bypass captcha
     if session.get('logged_in'):
         if review_text:
             ReviewService.create_review(review_text)
             flash('Review added successfully!', 'success')
-            return redirect(url_for('admin.manage_reviews'))
+            return redirect(url_for('admin.manage_reviews'))  # Admin stays in admin area
     else:
-        # Handle non-admin submission with captcha and rate limiting
+        # Handle non-admin submission
         if not review_text:
             flash('Review text is required', 'error')
             return redirect(url_for('main.submit_review'))
@@ -94,9 +94,9 @@ def submit_review():
         session.pop('captcha_text', None)
         
         ReviewService.create_pending_review(review_text)
-        flash('Review submitted successfully! It will be reviewed by an admin.', 'success')
-        
-    return redirect(url_for('main.play_game'))
+        return render_template('submit_thanks.html', is_admin=False)  # Only regular users see thank you page
+    
+    return redirect(url_for('main.submit_review'))
 
 @bp.route('/refresh-captcha', methods=['POST'])
 def refresh_captcha():

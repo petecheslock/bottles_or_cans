@@ -40,30 +40,28 @@
 
                     {% if not is_admin %}
                         <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
-                            <label for="captcha_answer" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Please enter the text shown in the image:
-                            </label>
                             <div class="space-y-4">
-                                <!-- Captcha container with left alignment -->
-                                <div class="relative inline-block">
-                                    <img id="captchaImage" 
-                                         src="data:image/png;base64,{{ captcha_image }}" 
-                                         alt="CAPTCHA" 
-                                         class="rounded-lg shadow-sm"
-                                         style="background-color: white; width: 320px; height: 100px;">
-                                </div>
-                                
-                                <!-- Separate refresh button below image -->
-                                <div>
+                                <!-- Captcha container with refresh button -->
+                                <div class="flex items-start space-x-4">
+                                    <!-- Captcha image -->
+                                    <div class="relative">
+                                        <img id="captchaImage" 
+                                             src="data:image/png;base64,{{ captcha_image }}" 
+                                             alt="CAPTCHA" 
+                                             class="rounded-lg shadow-sm"
+                                             style="background-color: white; width: 320px; height: 100px;">
+                                    </div>
+                                    
+                                    <!-- Refresh button aligned to the right -->
                                     <button type="button" 
                                             onclick="refreshCaptcha()"
-                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 flex items-center space-x-2 text-base font-medium shadow-sm hover:-translate-y-0.5">
+                                            class="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 flex items-center space-x-2 text-sm font-medium shadow-sm hover:-translate-y-0.5 border border-gray-200 dark:border-gray-500">
                                         <i class="bi bi-arrow-clockwise text-lg"></i>
                                         <span>Refresh Captcha</span>
                                     </button>
                                 </div>
                                 
-                                <!-- Input field -->
+                                <!-- Input field with better spacing -->
                                 <div class="max-w-md">
                                     <input 
                                         type="text" 
@@ -75,10 +73,6 @@
                                         autocomplete="off"
                                     >
                                 </div>
-                                
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Enter the 5 characters shown in the image above
-                                </p>
                             </div>
                         </div>
                     {% endif %}

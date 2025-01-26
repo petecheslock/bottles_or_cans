@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 mt-12">
    {% if review %}
        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
-           <!-- Review Text Section -->
+           <!-- Review Text Section - Keep original padding -->
            <div class="p-8 border-b border-gray-200 dark:border-gray-700">
                <div class="max-w-xl mx-auto text-xl italic text-gray-800 dark:text-gray-200 p-6 mb-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                    <div id="measureText" class="font-mono whitespace-pre-wrap leading-relaxed invisible absolute text-left">{{ review.text }}</div>
@@ -14,10 +14,10 @@
                </div>
            </div>
 
-           <!-- Voting Section - Always Visible but Initially Disabled -->
-           <div class="p-8">
+           <!-- Voting Section - Reduced top padding -->
+           <div class="p-8 pt-3">
                <div class="vote-buttons {% if has_voted %}hidden{% endif %} text-center">
-                   <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-6">What type of review is this?</h3>
+                   <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-4">What type of review is this?</h3>
                    <div class="flex justify-center gap-6">
                        <button id="headphonesBtn" 
                                onclick="submitVote('headphones')" 
@@ -34,7 +34,13 @@
                    </div>
                </div>
 
-               <div class="vote-results {% if has_voted %}block{% else %}hidden{% endif %} bg-white dark:bg-gray-800 p-6 rounded-lg mt-8">
+               <div class="vote-results {% if has_voted %}block{% else %}hidden{% endif %} p-6 rounded-lg mt-4">
+                   <div class="text-center mb-4">
+                       <a href="{{ url_for('index') }}" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">
+                           <i class="bi bi-arrow-right-circle mr-2"></i>Play Again
+                       </a>
+                   </div>
+
                    <h3 class="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">What Others Thought</h3>
                    <div class="mb-6">
                        <div class="flex justify-between mb-2">
@@ -44,7 +50,7 @@
                            <span class="headphones-percentage text-gray-900 dark:text-white">0%</span>
                        </div>
                        <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                           <div class="h-full bg-blue-600 transition-all duration-1000" style="width: 0%"></div>
+                           <div class="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
                        </div>
                    </div>
                    <div class="mb-6">
@@ -55,18 +61,14 @@
                            <span class="wine-percentage text-gray-900 dark:text-white">0%</span>
                        </div>
                        <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                           <div class="h-full bg-red-600 transition-all duration-1000" style="width: 0%"></div>
+                           <div class="h-full bg-red-600 dark:bg-red-500 transition-all duration-1000" style="width: 0%"></div>
                        </div>
                    </div>
-                   <div class="text-center mt-8">
-                       <a href="{{ url_for('index') }}" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">
-                           <i class="bi bi-arrow-right-circle mr-2"></i>Play Again
+                   
+                   <div class="text-center mt-4">
+                       <a href="{{ url_for('submit_review') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                           <i class="bi bi-pencil mr-1"></i>Submit your own review
                        </a>
-                       <div class="mt-4">
-                           <a href="{{ url_for('submit_review') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
-                               <i class="bi bi-pencil mr-1"></i>Submit your own review
-                           </a>
-                       </div>
                    </div>
                </div>
            </div>
@@ -131,8 +133,8 @@ function submitVote(voteType) {
             voteResults.classList.add('animate__animated', 'animate__fadeIn');
             
             setTimeout(() => {
-                const headphonesBar = voteResults.querySelector('.bg-blue-600');
-                const wineBar = voteResults.querySelector('.bg-red-600');
+                const headphonesBar = voteResults.querySelector('.bg-blue-600.dark\\:bg-blue-500');
+                const wineBar = voteResults.querySelector('.bg-red-600.dark\\:bg-red-500');
                 const headphonesPercentage = voteResults.querySelector('.headphones-percentage');
                 const winePercentage = voteResults.querySelector('.wine-percentage');
                 

@@ -1,15 +1,28 @@
-from sqlalchemy import create_engine, MetaData
-import pandas as pd
+import sqlite3
+import json
+from datetime import datetime
 
-DATABASE_URI = 'sqlite:///instance/reviews.db'
-engine = create_engine(DATABASE_URI)
+def datetime_handler(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-metadata = MetaData()
-metadata.reflect(bind=engine)
+def export_reviews():
+    # Connect to the database
+    conn = sqlite3.connect('instance/bottles_or_cans.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
 
-tables_to_export = [table for table in metadata.tables.keys() if table != 'users']
+    # Get all reviews
+    cursor.execute('SELECT * FROM review')
+    reviews = [dict(row) for row in cursor.fetchall()]
 
-for table_name in tables_to_export:
-    df = pd.read_sql_table(table_name, con=engine)
-    df.to_csv(f'{table_name}.csv', index=False)
-    print(f'Exported {table_name} to {table_name}.csv') 
+    # Export to JSON file
+    with open('reviews_export.json', 'w') as f:
+        json.dump(reviews, f, indent=2, default=datetime_handler)
+
+    print(f"Exported {len(reviews)} reviews to reviews_export.json")
+    conn.close()
+
+if __name__ == '__main__':
+    export_reviews() 

@@ -1,7 +1,7 @@
-import os
-import pandas as pd
+import json
+from datetime import datetime
 from app import app, db, User, Review, PendingReview
-import getpass  # Add this import at the top of your script
+import getpass
 
 def create_tables():
     """Create all necessary tables in the database."""
@@ -9,30 +9,34 @@ def create_tables():
         db.create_all()
         print("Database and tables created successfully!")
 
-def import_reviews_from_csv():
-    """Import reviews from reviews.csv if it exists."""
-    csv_file = 'reviews.csv'
-    if os.path.exists(csv_file):
-        try:
-            df = pd.read_csv(csv_file)
-            print(f"Debug: Found {len(df)} rows in {csv_file}.")
-            with app.app_context():
-                for index, row in df.iterrows():
-                    # print(f"Debug: Importing review {index + 1}: {row['text']}, Votes Headphones: {row.get('votes_headphones', 0)}, Votes Wine: {row.get('votes_wine', 0)}")
-                    
+def import_reviews_from_json():
+    """Import reviews from reviews_export.json if it exists."""
+    try:
+        with open('reviews_export.json', 'r') as f:
+            reviews = json.load(f)
+        
+        with app.app_context():
+            # Check if reviews table is empty
+            if Review.query.count() == 0:
+                for review_data in reviews:
                     new_review = Review(
-                        text=row['text'],
-                        votes_headphones=row.get('votes_headphones', 0),
-                        votes_wine=row.get('votes_wine', 0)
+                        id=review_data['id'],
+                        text=review_data['text'],
+                        votes_headphones=review_data['votes_headphones'],
+                        votes_wine=review_data['votes_wine'],
+                        created_at=datetime.strptime(review_data['created_at'], '%Y-%m-%d %H:%M:%S.%f')
                     )
                     db.session.add(new_review)
                 db.session.commit()
-                print(f"Imported {len(df)} reviews from {csv_file}.")
-        except Exception as e:
-            print(f"Error importing reviews: {e}")
-            db.session.rollback()
-    else:
-        print(f"{csv_file} not found. No reviews imported.")
+                print(f"Imported {len(reviews)} reviews from backup")
+            else:
+                print("Reviews table not empty, skipping import")
+                
+    except FileNotFoundError:
+        print("No reviews backup found (reviews_export.json)")
+    except Exception as e:
+        print(f"Error importing reviews: {e}")
+        db.session.rollback()
 
 def create_admin_user():
     """Prompt for admin user credentials and create the user."""
@@ -69,7 +73,7 @@ def create_admin_user():
 def main():
     """Main function to initialize the database."""
     create_tables()
-    import_reviews_from_csv()
+    import_reviews_from_json()
     
     with app.app_context():
         if User.query.count() == 0:  # Check if there are no users

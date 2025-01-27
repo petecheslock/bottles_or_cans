@@ -18,6 +18,57 @@ To set up and run this application, you will need the following:
 
 You can install the required Python packages using pip. It is recommended to use a virtual environment to manage dependencies.
 
+## Features
+
+### Core Features
+- Interactive voting system for comparing headphone and wine reviews
+- Real-time vote tracking and statistics
+- Animated simulated typing effect for review presentation
+- Custom modal dialogs for enhanced user interaction
+- Mobile-responsive design using Tailwind CSS
+- Dark mode support
+
+### User Features
+- Anonymous voting capability
+- Review submission system with moderation
+- User registration and authentication
+
+### Admin Dashboard
+- Comprehensive review management
+  - Add, edit, and delete reviews
+  - Moderate user-submitted reviews
+  - Bulk import reviews from CSV files
+- User management system
+  - View and manage user accounts
+  - Admin role assignment
+  - Account suspension capabilities
+- Analytics and Statistics
+  - Vote distribution visualization
+  - User engagement metrics
+  - Popular reviews tracking
+  - Export data in various formats
+
+### Security & Anti-Abuse Features
+- Rate limiting on votes and submissions
+- IP-based abuse detection
+- CAPTCHA integration for submissions
+- Input sanitization and validation
+
+### Technical Features
+- RESTful API endpoints
+- WebSocket support for real-time updates
+- Caching system for improved performance
+- Database optimization for large datasets
+- Automated backup system
+- Comprehensive logging system
+
+### Customization
+- Configurable voting thresholds
+- Adjustable moderation settings
+- Customizable UI themes
+- Flexible API rate limits
+- Configurable security parameters
+
 ## Setup Instructions
 
 1. **Clone the Repository**

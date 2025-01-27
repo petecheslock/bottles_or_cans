@@ -83,14 +83,10 @@
                 </h2>
                 <p class="text-gray-600 dark:text-gray-400 mb-4">
                     There are no reviews in the database yet. 
-                    {% if session.get('logged_in') %}
-                        <a href="{{ url_for('main.submit_review') }}" 
-                           class="text-blue-600 dark:text-blue-400 hover:underline">
-                            Add the first review
-                        </a>
-                    {% else %}
-                        Please check back later.
-                    {% endif %}
+                    <a href="{{ url_for('main.submit_review') }}" 
+                       class="text-blue-600 dark:text-blue-400 hover:underline">
+                        Why not be the first to submit a review?
+                    </a>
                 </p>
             </div>
         {% endif %}

@@ -29,10 +29,6 @@ def create_app(config_class=None):
     app.register_blueprint(admin_bp)
     app.register_blueprint(main_bp)
     
-    # Create tables
-    with app.app_context():
-        db.create_all()
-    
     # Register template context processors
     register_template_processors(app)
     

@@ -162,6 +162,6 @@ def refresh_captcha():
     """Generate a new captcha image"""
     if not session.get('logged_in'):  # Only for non-admin users
         captcha_image, captcha_text = CaptchaService.generate_captcha()
-        session['captcha_text'] = captcha_text
+        session['captcha_answer'] = captcha_text
         return jsonify({'captcha_image': captcha_image})
     return jsonify({'error': 'Unauthorized'}), 401 

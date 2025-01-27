@@ -4,6 +4,7 @@ from app.services.captcha import CaptchaService
 from app.utils.decorators import login_required
 from app.services.rate_limit import RateLimitService
 from app.services.user import UserService
+from flask import current_app
 
 bp = Blueprint('main', __name__)
 
@@ -98,7 +99,7 @@ def submit_review():
             flash('Review text is required', 'error')
             return render_template('submit_review.html', is_admin=is_admin), 400
         
-        if len(text) > 500:
+        if len(text) > current_app.config['MAX_REVIEW_LENGTH']:
             if is_ajax:
                 return jsonify({'success': False, 'error': 'Review text too long'}), 400
             flash('Review text too long', 'error')

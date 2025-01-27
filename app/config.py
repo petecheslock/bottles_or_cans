@@ -15,6 +15,7 @@ class Config:
     
     # Application settings
     CAPTCHA_LENGTH = int(os.getenv('CAPTCHA_LENGTH', 4))
+    MAX_REVIEW_LENGTH = int(os.getenv('MAX_REVIEW_LENGTH', 500))
     
     @classmethod
     def validate_config(cls):

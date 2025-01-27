@@ -101,7 +101,7 @@ class TestMainRoutes(BaseTestCase):
 
         # Test too long review text
         response = self.client.post('/submit-review', data={
-            'review_text': 'x' * 1001,  # Assuming max length is 1000
+            'review_text': 'x' * 501,
             'captcha_answer': 'DUMMY'
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 400)

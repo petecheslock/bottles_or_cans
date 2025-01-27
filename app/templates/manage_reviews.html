@@ -23,13 +23,15 @@
 
                 <div class="flex justify-end mb-6">
                     <button type="button" 
+                            {% if not reviews %}disabled{% endif %}
                             onclick="showConfirmModal(null, 'reset', 'Confirm Reset Votes', 'Are you sure you want to reset all vote counts to zero?')"
-                            class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-300 mr-4">
+                            class="px-4 py-2 {% if reviews %}bg-yellow-500 hover:bg-yellow-600{% else %}bg-gray-400 cursor-not-allowed{% endif %} text-white rounded-lg transition-colors duration-300 mr-4">
                         <i class="bi bi-arrow-counterclockwise mr-2"></i>Reset All Votes
                     </button>
                     <button type="button" 
+                            {% if not reviews %}disabled{% endif %}
                             onclick="showConfirmModal(null, 'seed', 'Confirm Seed Random Votes', 'Are you sure you want to seed reviews with random votes?')"
-                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-300">
+                            class="px-4 py-2 {% if reviews %}bg-green-600 hover:bg-green-700{% else %}bg-gray-400 cursor-not-allowed{% endif %} text-white rounded-lg transition-colors duration-300">
                         <i class="bi bi-dice-5 mr-2"></i>Seed Random Votes
                     </button>
                 </div>

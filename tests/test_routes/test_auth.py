@@ -239,4 +239,40 @@ class TestAuthRoutes(BaseTestCase):
         self.assertIsNotNone(review, "No review found in database after import")
         self.assertEqual(review.text, "Test review text")
         self.assertEqual(review.votes_wine, 1)
-        self.assertEqual(review.votes_headphones, 0) 
+        self.assertEqual(review.votes_headphones, 0)
+
+    def test_login_redirect_after_setup(self):
+        """Test login redirect behavior after setup"""
+        # First ensure no admin exists
+        self.db.session.close()
+        self.db.session.query(User).delete()
+        self.db.session.commit()
+        
+        # Complete setup
+        data = {
+            'username': 'admin',
+            'password': 'password123',
+            'confirm_password': 'password123'
+        }
+        response = self.client.post('/admin/setup', data=data)
+        self.assertEqual(response.status_code, 302)
+        
+        # Verify no "already logged in" message after setup
+        response = self.client.get('/admin/login', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b'You are already logged in', response.data)
+
+    def test_admin_index_redirect(self):
+        """Test /admin and /admin/ redirect appropriately"""
+        # Test both /admin and /admin/ when not logged in
+        for route in ['/admin', '/admin/']:
+            response = self.client.get(route, follow_redirects=False)
+            self.assertEqual(response.status_code, 302)
+            self.assertTrue(response.location.endswith('/admin/login'))
+        
+        # Test both routes when logged in
+        self.login_admin()
+        for route in ['/admin', '/admin/']:
+            response = self.client.get(route, follow_redirects=False)
+            self.assertEqual(response.status_code, 302)
+            self.assertTrue(response.location.endswith('/admin/dashboard')) 

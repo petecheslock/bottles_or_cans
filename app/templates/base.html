@@ -13,10 +13,11 @@
     <!-- Tailwind CSS -->
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
     <script>
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'true' || 
-            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // Check for saved dark mode preference, default to dark if not set
+        if (localStorage.getItem('darkMode') === null || 
+            localStorage.getItem('darkMode') === 'true') {
             document.documentElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
         }
     </script>
 </head>

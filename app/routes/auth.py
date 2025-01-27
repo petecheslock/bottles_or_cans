@@ -57,9 +57,11 @@ def login():
     # Check for first-time setup
     if not UserService.get_admin_user():
         return redirect(url_for('auth.setup'))
-    # Check if already logged in
+        
+    # Check if already logged in, but skip the flash message if coming from setup
     if 'logged_in' in session:
-        flash('You are already logged in')
+        if not request.referrer or 'setup' not in request.referrer:
+            flash('You are already logged in')
         return redirect(url_for('admin.dashboard'))
         
     if request.method == 'POST':
@@ -116,4 +118,12 @@ def change_password():
     else:
         flash(message, 'danger')
     
-    return redirect(url_for('admin.manage_users')) 
+    return redirect(url_for('admin.manage_users'))
+
+@auth_bp.route('/admin')
+@auth_bp.route('/admin/')
+def admin_index():
+    """Redirect /admin and /admin/ to appropriate page based on login status"""
+    if session.get('logged_in'):
+        return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('auth.login')) 

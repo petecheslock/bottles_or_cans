@@ -11,29 +11,32 @@ class TestUserService(BaseTestCase):
 
     def test_change_admin_password(self):
         # Test successful password change
-        result = UserService.change_admin_password(
+        success, message = UserService.change_admin_password(
             self.admin.id,
             'test_password',  # Current password
             'new_password',
             'new_password'
         )
-        self.assertTrue(result)
+        self.assertTrue(success)
+        self.assertEqual(message, "Password updated successfully")
         self.assertTrue(self.admin.check_password('new_password'))
 
         # Test failed password change - wrong current password
-        result = UserService.change_admin_password(
+        success, message = UserService.change_admin_password(
             self.admin.id,
             'wrong_password',
             'new_password2',
             'new_password2'
         )
-        self.assertFalse(result)
+        self.assertFalse(success)
+        self.assertEqual(message, "Current password is incorrect")
 
         # Test failed password change - passwords don't match
-        result = UserService.change_admin_password(
+        success, message = UserService.change_admin_password(
             self.admin.id,
             'new_password',
             'newer_password',
             'different_password'
         )
-        self.assertFalse(result) 
+        self.assertFalse(success)
+        self.assertEqual(message, "Passwords do not match") 

@@ -131,10 +131,13 @@ def reset_all_votes():
 @admin_bp.route('/seed-reviews', methods=['POST'])
 @login_required
 def seed_reviews():
-    """Seed reviews with random votes for testing"""
-    reviews = db.session.execute(db.select(Review)).scalars().all()
+    """Seed reviews with random vote counts"""
+    reviews = Review.query.all()
     for review in reviews:
-        review.votes_headphones = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
-        review.votes_wine = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
+        # Generate random vote counts between 0 and 100
+        review.votes_headphones = random.randint(0, 100)
+        review.votes_wine = random.randint(0, 100)
+    
     db.session.commit()
-    return jsonify({'success': True}) 
+    flash('Reviews seeded successfully!', 'success')
+    return redirect(url_for('admin.manage_reviews')) 

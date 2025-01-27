@@ -7,10 +7,23 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/admin/login', methods=['GET', 'POST'])
 def login():
+    # Check if already logged in
+    if 'logged_in' in session:
+        flash('You are already logged in')
+        return redirect(url_for('admin.dashboard'))
+        
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         
+        # Validate required fields
+        if not username:
+            flash('Username is required', 'danger')
+            return render_template('admin_login.html'), 400
+        if not password:
+            flash('Password is required', 'danger')
+            return render_template('admin_login.html'), 400
+            
         user = UserService.authenticate_admin(username, password)
         if user:
             session['logged_in'] = True
@@ -41,16 +54,16 @@ def change_password():
     new_password = request.form.get('new_password')
     confirm_password = request.form.get('confirm_password')
     
-    result = UserService.change_admin_password(
+    success, message = UserService.change_admin_password(
         user_id, 
         current_password, 
         new_password, 
         confirm_password
     )
     
-    if result:
-        flash('Password updated successfully!', 'success')
+    if success:
+        flash(message, 'success')
     else:
-        flash('Failed to update password. Please check your input.', 'danger')
+        flash(message, 'danger')
     
     return redirect(url_for('admin.manage_users')) 

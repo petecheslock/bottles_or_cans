@@ -15,6 +15,106 @@ class TestAuthRoutes(BaseTestCase):
             follow_redirects=True)
         self.assertIn(b'Logged in successfully', response.data)
 
+    def test_login_validation(self):
+        """Test login form validation"""
+        # Test missing username
+        response = self.client.post('/admin/login', data={
+            'password': 'test_password'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Username is required', response.data)
+
+        # Test missing password
+        response = self.client.post('/admin/login', data={
+            'username': 'admin_test'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Password is required', response.data)
+
+        # Test empty form submission
+        response = self.client.post('/admin/login', data={}, 
+                                  follow_redirects=True)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Username is required', response.data)
+
+    def test_already_logged_in(self):
+        """Test accessing login page when already logged in"""
+        # First login
+        self.login_admin()
+        
+        # Try accessing login page again
+        response = self.client.get('/admin/login', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        
+        # Should be redirected to dashboard with flash message
+        self.assertIn(b'Dashboard', response.data)  # Verify we're on dashboard
+        self.assertIn(b'You are already logged in', response.data)
+
+    def test_logout_functionality(self):
+        """Test complete logout functionality"""
+        # First login
+        self.login_admin()
+        
+        # Verify logged in state
+        response = self.client.get('/admin/dashboard')
+        self.assertEqual(response.status_code, 200)
+        
+        # Test logout
+        response = self.client.get('/admin/logout', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Logged out successfully', response.data)
+        
+        # Verify session is cleared
+        with self.client.session_transaction() as sess:
+            self.assertNotIn('logged_in', sess)
+            self.assertNotIn('user_id', sess)
+        
+        # Verify can't access protected routes after logout
+        response = self.client.get('/admin/dashboard', follow_redirects=True)
+        self.assertIn(b'Please log in', response.data)
+
+    def test_change_password(self):
+        """Test password change functionality"""
+        # Login first
+        self.login_admin()
+        
+        # Test successful password change
+        response = self.client.post('/admin/users/change-password', data={
+            'current_password': 'test_password',
+            'new_password': 'new_password123',
+            'confirm_password': 'new_password123'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Password updated successfully', response.data)
+        
+        # Test login with new password
+        self.client.get('/admin/logout')
+        response = self.client.post('/admin/login', data={
+            'username': 'admin_test',
+            'password': 'new_password123'
+        }, follow_redirects=True)
+        self.assertIn(b'Logged in successfully', response.data)
+
+    def test_change_password_validation(self):
+        """Test password change validation"""
+        self.login_admin()
+        
+        # Test wrong current password
+        response = self.client.post('/admin/users/change-password', data={
+            'current_password': 'wrong_password',
+            'new_password': 'new_pass',
+            'confirm_password': 'new_pass'
+        }, follow_redirects=True)
+        self.assertIn(b'Current password is incorrect', response.data)
+        
+        # Test passwords don't match
+        response = self.client.post('/admin/users/change-password', data={
+            'current_password': 'test_password',
+            'new_password': 'new_pass1',
+            'confirm_password': 'new_pass2'
+        }, follow_redirects=True)
+        self.assertIn(b'Passwords do not match', response.data)
+
     def test_login_required_redirect(self):
         """Test login required redirects"""
         # Logout first

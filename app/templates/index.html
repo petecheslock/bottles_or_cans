@@ -4,11 +4,10 @@
 {% include 'components/typing_animation.html' %}
 
 <div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-2xl mx-auto">
         {% if review %}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8">
-                <!-- Review Text Section - Keep original padding -->
-                <div class="p-8 border-b border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="max-w-full mx-auto">
                         {% with id_suffix = '' %}
                             {% include 'components/review_container.html' %}
@@ -16,7 +15,6 @@
                     </div>
                 </div>
 
-                <!-- Voting Section - Reduced top padding -->
                 <div class="p-8 pt-3">
                     <div class="vote-buttons {% if has_voted %}hidden{% endif %} text-center">
                         <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-4">What type of review is this?</h3>

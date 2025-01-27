@@ -2,9 +2,9 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-2xl mx-auto">
         <!-- Header -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 mb-6">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Text Display Test</h1>
             <div class="flex justify-between items-center">
                 <button id="prevReview" class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -17,9 +17,9 @@
             </div>
         </div>
 
-        <!-- Review Container (matches game exactly) -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8">
-            <div class="p-8 border-b border-gray-200 dark:border-gray-700">
+        <!-- Review Container -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="max-w-full mx-auto">
                     {% with review = reviews[0], id_suffix = '' %}
                         {% include 'components/review_container.html' %}
@@ -55,21 +55,23 @@ const reviews = {{ reviews|tojson|safe }};
 function showReview(index) {
     const review = reviews[index];
     const textContainer = document.getElementById('reviewText');
+    const measureDiv = document.getElementById('measureText');
+    
+    // Update text content
     textContainer.textContent = review.text;
+    measureDiv.textContent = review.text;
     
     // Update review counter
     document.getElementById('reviewCount').textContent = 
         `Review ${index + 1} of ${reviews.length}`;
     
-    // Update debug info
-    document.getElementById('charCount').textContent = review.text.length;
-    
-    // Use the same initialization logic as the game
-    const measureDiv = document.getElementById('measureText');
+    // Use exact same sizing logic as game
     void measureDiv.offsetHeight;
     const measuredHeight = measureDiv.offsetHeight;
     textContainer.style.minHeight = `${measuredHeight}px`;
     
+    // Update debug info
+    document.getElementById('charCount').textContent = review.text.length;
     document.getElementById('containerHeight').textContent = `${measuredHeight}px`;
     document.getElementById('lineCount').textContent = 
         Math.round(measuredHeight / parseInt(getComputedStyle(measureDiv).lineHeight));
@@ -90,46 +92,9 @@ document.getElementById('nextReview').addEventListener('click', () => {
     showReview(currentReviewIndex);
 });
 
-function updateContainerSize() {
-    const measureDiv = document.getElementById('measureText');
-    const textContainer = document.getElementById('reviewText');
-    
-    // Force layout recalculation
-    void measureDiv.offsetHeight;
-    const measuredHeight = measureDiv.offsetHeight;
-    
-    // Update container size with transition
-    textContainer.style.minHeight = `${measuredHeight}px`;
-    textContainer.style.height = `${measuredHeight}px`;
-    
-    // Update debug info if it exists
-    const containerHeight = document.getElementById('containerHeight');
-    const lineCount = document.getElementById('lineCount');
-    if (containerHeight) containerHeight.textContent = `${measuredHeight}px`;
-    if (lineCount) {
-        lineCount.textContent = 
-            Math.round(measuredHeight / parseInt(getComputedStyle(measureDiv).lineHeight));
-    }
-}
-
-// Add resize observer
-const resizeObserver = new ResizeObserver(entries => {
-    requestAnimationFrame(() => {
-        updateContainerSize();
-    });
-});
-
+// Initialize with first review
 document.addEventListener('DOMContentLoaded', () => {
-    const measureDiv = document.getElementById('measureText');
-    if (measureDiv) {
-        resizeObserver.observe(measureDiv.parentElement);
-        showReview(0);
-    }
-});
-
-// Cleanup when leaving page
-window.addEventListener('unload', () => {
-    resizeObserver.disconnect();
+    showReview(0);
 });
 </script>
 {% endblock %} 

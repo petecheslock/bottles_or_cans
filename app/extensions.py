@@ -7,10 +7,8 @@ import sys
 db = SQLAlchemy()
 login_manager = LoginManager()
 
-def init_app(app):
-    """Initialize Flask extensions and check database setup"""
-    db.init_app(app)
-    
+def init_admin_user(app):
+    """Initialize admin user if it doesn't exist"""
     with app.app_context():
         # Create all tables
         db.create_all()
@@ -47,6 +45,7 @@ def init_app(app):
 
 def init_extensions(app):
     """Initialize Flask extensions."""
+    # Initialize SQLAlchemy
     db.init_app(app)
     
     # Configure login manager
@@ -57,4 +56,7 @@ def init_extensions(app):
     @login_manager.user_loader
     def load_user(user_id):
         from app.models.user import User
-        return User.query.get(int(user_id)) 
+        return User.query.get(int(user_id))
+    
+    # Initialize admin user
+    init_admin_user(app) 

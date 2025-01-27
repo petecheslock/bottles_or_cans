@@ -13,16 +13,17 @@ class Config:
     ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
     
-    def __init__(self):
-        # Validate required settings
-        if not self.ADMIN_USERNAME or not self.ADMIN_PASSWORD:
+    # Application settings
+    CAPTCHA_LENGTH = int(os.getenv('CAPTCHA_LENGTH', 4))
+    
+    @classmethod
+    def validate_config(cls):
+        """Validate configuration settings"""
+        if not cls.ADMIN_USERNAME or not cls.ADMIN_PASSWORD:
             raise ValueError(
                 "ADMIN_USERNAME and ADMIN_PASSWORD must be set in environment "
                 "or .env file!"
             )
-    
-    # Application settings
-    CAPTCHA_LENGTH = int(os.getenv('CAPTCHA_LENGTH', 4))
 
 class DevelopmentConfig(Config):
     """Development configuration."""
@@ -41,11 +42,12 @@ class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///bottles_or_cans.db')
     
-    def __init__(self):
-        if not self.SECRET_KEY or self.SECRET_KEY == 'dev-key-please-change':
+    @classmethod
+    def validate_config(cls):
+        """Additional validation for production"""
+        super().validate_config()
+        if not cls.SECRET_KEY or cls.SECRET_KEY == 'dev-key-please-change':
             raise ValueError("Production SECRET_KEY must be set!")
-        if not self.ADMIN_PASSWORD:
-            raise ValueError("Production ADMIN_PASSWORD must be set!")
 
 # Configuration dictionary
 config = {
@@ -58,4 +60,6 @@ config = {
 def get_config():
     """Get configuration class based on environment."""
     env = os.getenv('FLASK_ENV', 'development')
-    return config.get(env, config['default'])
+    config_class = config.get(env, config['default'])
+    config_class.validate_config()
+    return config_class

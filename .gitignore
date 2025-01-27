@@ -1,6 +1,6 @@
 __pycache__
 .venv
-instance/bottles_or_cans.db
+instance/**.db
 node_modules
 
 # Coverage files
@@ -8,6 +8,4 @@ node_modules
 coverage.xml
 htmlcov/
 
-# Database files
-*.db
-test.db
+.env

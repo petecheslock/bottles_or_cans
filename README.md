@@ -218,12 +218,12 @@ Once running, you can access the application through your web browser:
      ```
    - Set this as your `SECRET_KEY` in .env
 
-2. **Admin Password**
-   - Set a strong `ADMIN_PASSWORD` in .env
+2. **Admin Credentials**
+   - Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` in your .env file
+   - These will be used to create the admin account on first run
 
-
-## Admin Access
-To access the admin dashboard, login using the admin user during the database initialization.
+### Admin Access
+The admin user is automatically created on first run using the credentials from your .env file.
 
 ## Contributing
 Contributions are welcome! If you have suggestions for improvements or new features, feel free to open an issue or submit a pull request.

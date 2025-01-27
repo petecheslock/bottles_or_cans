@@ -8,7 +8,6 @@ class TestMainRoutes(BaseTestCase):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Bottles or Cans?', response.data)
-        self.assertIn(b'Welcome', response.data)
 
     def test_play_game_route(self):
         # Create a test review first
@@ -108,19 +107,8 @@ class TestMainRoutes(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn(b'Review text too long', response.data)
 
-    def test_root_redirects_to_setup_when_no_admin(self):
-        """Test that root URL redirects to setup when no admin exists"""
-        # First ensure no admin exists
-        from app.models.user import User
-        self.db.session.query(User).delete()
-        self.db.session.commit()
-        
-        response = self.client.get('/', follow_redirects=False)
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.location.endswith('/admin/setup'))
-
-    def test_root_shows_landing_when_admin_exists(self):
-        """Test that root URL shows landing page when admin exists"""
+    def test_root_route(self):
+        """Test that root URL shows game page"""
         response = self.client.get('/', follow_redirects=False)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Welcome to Bottles or Cans', response.data) 
+        self.assertIn(b'Bottles or Cans?', response.data) 

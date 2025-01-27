@@ -9,15 +9,19 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    # Check if this is first-time setup
-    if not UserService.get_admin_user():
-        return redirect(url_for('auth.setup'))
+    """Landing page."""
+    review = ReviewService.get_random_review()
+    if review:
+        headphones_percentage, wine_percentage = ReviewService.calculate_vote_percentages(review)
+    else:
+        # No reviews yet
+        headphones_percentage = wine_percentage = 0
         
-    # If user hasn't seen landing page, show it first
-    if not session.get('seen_landing'):
-        return render_template('landing.html')
-        
-    return redirect(url_for('main.play_game'))
+    return render_template('index.html', 
+                         review=review,
+                         headphones_percentage=headphones_percentage,
+                         wine_percentage=wine_percentage,
+                         has_voted=False)
 
 @bp.route('/play')
 def play_game():

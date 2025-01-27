@@ -25,9 +25,20 @@
     <nav class="bg-slate-800 dark:bg-gray-950 shadow-md animate__animated animate__fadeIn">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap justify-between items-center py-3">
-                <a class="text-white text-lg font-semibold hover:text-gray-200 transition-colors duration-300" href="{{ url_for('main.index') }}">
-                    <i class="bi bi-headphones mr-2"></i><i class="fa-solid fa-wine-bottle mx-2"></i>Bottles or Cans?
-                </a>
+                <div class="flex items-center">
+                    <a class="text-white text-lg font-semibold hover:text-gray-200 transition-colors duration-300" href="{{ url_for('main.index') }}">
+                        <i class="bi bi-headphones mr-2"></i><i class="fa-solid fa-wine-bottle mx-2"></i>Bottles or Cans?
+                    </a>
+                    <!-- Dark mode toggle with small padding -->
+                    <div class="flex items-center gap-2 ml-3">
+                        <i class="bi bi-sun text-yellow-500 text-sm"></i>
+                        <button id="darkModeToggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none bg-gray-200 dark:bg-blue-600">
+                            <span class="sr-only">Toggle dark mode</span>
+                            <span id="toggleCircle" class="inline-block w-4 h-4 transform transition-transform bg-white rounded-full translate-x-1 dark:translate-x-6"></span>
+                        </button>
+                        <i class="fa-solid fa-moon text-gray-400 dark:text-white text-sm"></i>
+                    </div>
+                </div>
                 <button class="mobile-menu-toggle lg:hidden text-white" type="button">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-16 6h16"></path>
@@ -49,16 +60,6 @@
                                 <i class="bi bi-box-arrow-right mr-1"></i>Logout
                             </a>
                         {% endif %}
-                        
-                        <!-- Move dark mode toggle to the end with icons outside -->
-                        <div class="flex items-center gap-2 ml-4">
-                            <i class="bi bi-sun text-yellow-500 text-sm"></i>
-                            <button id="darkModeToggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none bg-gray-200 dark:bg-blue-600">
-                                <span class="sr-only">Toggle dark mode</span>
-                                <span id="toggleCircle" class="inline-block w-4 h-4 transform transition-transform bg-white rounded-full translate-x-1 dark:translate-x-6"></span>
-                            </button>
-                            <i class="fa-solid fa-moon text-gray-400 dark:text-white text-sm"></i>
-                        </div>
                     </div>
                 </div>
             </div>

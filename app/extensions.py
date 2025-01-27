@@ -9,6 +9,10 @@ login_manager = LoginManager()
 
 def init_admin_user(app):
     """Initialize admin user if it doesn't exist"""
+    # Skip admin creation if configured (for testing)
+    if app.config.get('SKIP_ADMIN_CREATION'):
+        return
+        
     with app.app_context():
         # Create all tables
         db.create_all()

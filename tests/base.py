@@ -15,21 +15,26 @@ class BaseTestCase(unittest.TestCase):
         self.app_context.push()
         self.db = db
         
+        # Drop and recreate all tables
+        db.drop_all()
         db.create_all()
         
-        # This is what creates the admin user by default
-        self.admin = User(username='admin_test', is_admin=True)
-        self.admin.set_password('test_password')
-        db.session.add(self.admin)
-        db.session.commit()
+        # Create test admin user
+        self.admin = User.query.filter_by(username='admin_test').first()
+        if not self.admin:
+            self.admin = User(username='admin_test', is_admin=True)
+            self.admin.set_password('test_password')
+            db.session.add(self.admin)
+            db.session.commit()
 
     def tearDown(self):
         self.db.session.remove()
         self.db.drop_all()
         self.app_context.pop()
 
-    def create_admin_user(self):
-        admin = User(username='admin_test', is_admin=True)
+    def create_admin_user(self, username='new_admin_test'):
+        """Create a new admin user with a unique username"""
+        admin = User(username=username, is_admin=True)
         admin.set_password('test_password')
         self.db.session.add(admin)
         self.db.session.commit()

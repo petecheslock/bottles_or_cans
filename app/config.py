@@ -36,9 +36,9 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
-    ADMIN_USERNAME = 'admin_test'
-    ADMIN_PASSWORD = 'test_password'
     SERVER_NAME = 'localhost'
+    # Skip admin user creation in tests
+    SKIP_ADMIN_CREATION = True
 
 class ProductionConfig(Config):
     """Production configuration."""

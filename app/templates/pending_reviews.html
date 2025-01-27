@@ -41,15 +41,33 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex items-start">
-                                            <form method="POST" action="{{ url_for('admin.approve_pending', review_id=review.id) }}" class="mr-8">
-                                                <button type="submit" 
-                                                        class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 px-4">
+                                        <div class="flex space-x-4">
+                                            <form method="POST" 
+                                               action="{{ url_for('admin.approve_pending', review_id=review.id) }}"
+                                                class="inline" 
+                                                id="approveForm-{{ review.id }}">
+                                                <button type="button" 
+                                                        onclick="showConfirmModal(
+                                                            '{{ review.id }}',
+                                                            'approve',
+                                                            'Confirm Approve Review',
+                                                            'Are you sure you want to approve this review?'
+                                                        )"
+                                                        class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300">
                                                     <i class="bi bi-check-circle mr-1"></i>Approve
                                                 </button>
                                             </form>
-                                            <form method="POST" action="{{ url_for('admin.reject_pending', review_id=review.id) }}" class="inline" id="rejectForm-{{ review.id }}">
-                                                <button type="submit" 
+                                            <form method="POST" 
+                                               action="{{ url_for('admin.reject_pending', review_id=review.id) }}"
+                                                class="inline" 
+                                                id="rejectForm-{{ review.id }}">
+                                                <button type="button" 
+                                                        onclick="showConfirmModal(
+                                                            '{{ review.id }}',
+                                                            'reject',
+                                                            'Confirm Reject Review',
+                                                            'Are you sure you want to reject this review?'
+                                                        )"
                                                         class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
                                                     <i class="bi bi-x-circle mr-1"></i>Reject
                                                 </button>
@@ -82,53 +100,33 @@
 
 <!-- Add this script at the bottom of the template -->
 <script>
-function showRejectConfirmation(reviewId) {
-    // First show the modal
-    showConfirmModal(
-        reviewId,
-        'reject',
-        'Confirm Rejection',
-        'Are you sure you want to reject this review?'
-    );
-
-    // Wait for a brief moment to ensure modal is rendered
-    setTimeout(() => {
-        // Get modal elements with error checking
-        const modalConfirm = document.getElementById('confirmAction');
-        if (!modalConfirm) {
-            console.error('Could not find confirm button');
-            return;
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmButton = document.getElementById('confirmAction');
+    const oldConfirmButton = confirmButton.cloneNode(true);
+    confirmButton.parentNode.replaceChild(oldConfirmButton, confirmButton);
+    
+    oldConfirmButton.addEventListener('click', function() {
+        if (currentAction === 'approve' && currentFormId) {
+            document.getElementById(`approveForm-${currentFormId}`).submit();
+            hideConfirmModal();
+        } else if (currentAction === 'reject' && currentFormId) {
+            document.getElementById(`rejectForm-${currentFormId}`).submit();
+            hideConfirmModal();
         }
+    });
 
-        // Clone and replace the confirm button
-        const newModalConfirm = modalConfirm.cloneNode(true);
-        modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
-
-        // Add the click handler
-        newModalConfirm.addEventListener('click', function() {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = "{{ url_for('admin.pending_reviews') }}";
-            form.innerHTML = `
-                <input type="hidden" name="review_id" value="${reviewId}">
-                <input type="hidden" name="action" value="reject">
-            `;
-            document.body.appendChild(form);
-            form.submit();
-        });
-
-        // Add keyboard support
-        function handleKeyPress(e) {
-            if (e.key === 'Enter' && !document.getElementById('confirmModal').classList.contains('hidden')) {
-                newModalConfirm.click();
-                document.removeEventListener('keydown', handleKeyPress);
+    // Add keyboard support for Enter key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('confirmModal').classList.contains('hidden')) {
+            if (currentAction === 'approve' && currentFormId) {
+                document.getElementById(`approveForm-${currentFormId}`).submit();
+                hideConfirmModal();
+            } else if (currentAction === 'reject' && currentFormId) {
+                document.getElementById(`rejectForm-${currentFormId}`).submit();
+                hideConfirmModal();
             }
         }
-
-        document.addEventListener('keydown', handleKeyPress);
-    }, 100);
-}
-
-// Remove old event listeners since we're handling everything in showRejectConfirmation now
+    });
+});
 </script>
 {% endblock %}

@@ -1,0 +1,27 @@
+# Mark HTML files as documentation/generated
+*.html linguist-documentation
+app/templates/* linguist-documentation
+
+# Mark Python files as the primary language
+*.py linguist-language=Python
+*.py linguist-detectable=true
+
+# Mark JavaScript files as vendored
+*.js linguist-vendored
+node_modules/* linguist-vendored
+
+# Mark CSS files as vendored
+*.css linguist-vendored
+app/static/css/* linguist-vendored
+
+# Ignore Tailwind config in language stats
+tailwind.config.js linguist-vendored
+postcss.config.js linguist-vendored
+
+# Standard text files
+*.md text
+*.txt text
+*.json text
+
+# Ensure LF line endings
+* text=auto eol=lf 

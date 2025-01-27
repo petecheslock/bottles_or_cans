@@ -3,7 +3,7 @@
 If you like listening to music on headphones, and have read the reviews for them, you'll notice that often times they sound a lot like the reviews for a bottle of wine.  Let's make a game out of this and vote on which review is for a pair of headphones (cans) or a bottle of wine. 
 
 ## Overview
-Bottles or Cans is a web application that allows users to submit reviews and vote on their preferences between two categories: headphones and wine. The application features an admin dashboard for managing reviews and users, as well as a user-friendly interface for submitting and viewing reviews.
+Bottles or Cans is a web application that allows users to submit reviews and vote on their preferences between two categories: headphones and wine. The application features an admin dashboard for managing reviews and users, as well as a user-friendly admin interface for submitting, viewing, and managing reviews.
 
 ## Requirements
 To set up and run this application, you will need the following:
@@ -37,16 +37,9 @@ You can install the required Python packages using pip. It is recommended to use
 - Comprehensive review management
   - Add, edit, and delete reviews
   - Moderate user-submitted reviews
-  - Bulk import reviews from CSV files
-- User management system
-  - View and manage user accounts
-  - Admin role assignment
-  - Account suspension capabilities
+  - Bulk import/export reviews from JSON files
 - Analytics and Statistics
   - Vote distribution visualization
-  - User engagement metrics
-  - Popular reviews tracking
-  - Export data in various formats
 
 ### Security & Anti-Abuse Features
 - Rate limiting on votes and submissions
@@ -65,9 +58,6 @@ You can install the required Python packages using pip. It is recommended to use
 ### Customization
 - Configurable voting thresholds
 - Adjustable moderation settings
-- Customizable UI themes
-- Flexible API rate limits
-- Configurable security parameters
 
 ## Setup Instructions
 

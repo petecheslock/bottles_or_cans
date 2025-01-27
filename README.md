@@ -157,7 +157,7 @@ gunicorn -w 4 -b 0.0.0.0:5000 "run:app"
 - `FLASK_APP`: Set to "app" (required)
 - `FLASK_ENV`: Set to "development" or "production"
 - `FLASK_DEBUG`: Set to 1 for development, 0 for production
-- `SECRET_KEY`: Required in production - set to a secure random string
+- `SECRET_KEY`: Required in production - set to a secure random string (`openssl rand -hex 32`)
 - `DATABASE_URL`: Optional - defaults to SQLite, set to your database URL if using a different database
 
 ### Accessing the Application

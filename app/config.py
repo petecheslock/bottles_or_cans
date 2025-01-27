@@ -60,7 +60,21 @@ config = {
 
 def get_config():
     """Get configuration class based on environment."""
-    env = os.getenv('FLASK_ENV', 'development')
-    config_class = config.get(env, config['default'])
+    # Check both FLASK_ENV and FLASK_DEBUG to determine environment
+    env = os.getenv('FLASK_ENV')
+    debug = os.getenv('FLASK_DEBUG')
+    
+    # If FLASK_DEBUG is '0' or FLASK_ENV is 'production', use production config
+    if debug == '0' or env == 'production':
+        environment = 'production'
+    else:
+        environment = 'development'
+    
+    print(f"Current FLASK_ENV: {env}")  # Debug line
+    print(f"Current FLASK_DEBUG: {debug}")  # Debug line
+    print(f"Current DATABASE_URL: {os.getenv('DATABASE_URL')}")  # Debug line
+    
+    config_class = config.get(environment, config['default'])
+    print(f"Selected config: {config_class.__name__}")  # Debug line
     config_class.validate_config()
     return config_class

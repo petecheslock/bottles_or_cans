@@ -96,29 +96,10 @@ def manage_users():
 @admin_bp.route('/test-text-display')
 @login_required
 def test_text_display():
-    test_reviews = [
-        {
-            "text": "Short review.",
-            "description": "Very short review"
-        },
-        {
-            "text": "This is a medium length review that should fit comfortably in the container without any issues.",
-            "description": "Medium length review"
-        },
-        {
-            "text": "This is a longer review with multiple sentences. It includes some punctuation marks, which affect typing speed. The container should adjust properly to fit all this text without any visual issues.",
-            "description": "Long review with multiple sentences"
-        },
-        {
-            "text": "A very long review that goes into great detail. It contains multiple paragraphs.\n\nThe second paragraph adds significant height. There are also some very long sentences that might wrap multiple times depending on the screen width.\n\nFinally, a third paragraph to really test the limits of the container sizing.",
-            "description": "Multi-paragraph review"
-        },
-        {
-            "text": "Edge case with lots of punctuation... !!! ??? ,,, ;;; ::: Testing how the timing and container handles unusual punctuation patterns!?!?!",
-            "description": "Review with heavy punctuation"
-        }
-    ]
-    return render_template('test_text_display.html', test_reviews=test_reviews)
+    """Display actual reviews to test text container sizing"""
+    # Get all approved reviews from the database
+    reviews = ReviewService.get_all_reviews()
+    return render_template('test_text_display.html', reviews=reviews)
 
 @admin_bp.route('/reset-votes/<int:review_id>', methods=['POST'])
 @login_required

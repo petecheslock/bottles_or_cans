@@ -1,28 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% include 'components/typing_animation.html' %}
-
 <div class="container mx-auto px-4 mt-12">
-    <div class="max-w-4xl mx-auto space-y-8">
+    <div class="max-w-2xl mx-auto space-y-8">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Text Display Test Cases</h1>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">This page tests various review lengths and formats to ensure proper container sizing and animation.</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Text Display Test</h1>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Testing container sizing with actual reviews from the database.</p>
         </div>
 
-        {% for review in test_reviews %}
+        {% for review in reviews %}
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
             <div class="border-b border-gray-200 dark:border-gray-700 p-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Test Case: {{ review.description }}
+                    Review #{{ review.id }}
                 </h2>
             </div>
             
-            <!-- Review Text Section -->
+            <!-- Review Text Section - Match game width exactly -->
             <div class="p-8 border-b border-gray-200 dark:border-gray-700">
-                <div class="max-w-xl mx-auto text-xl italic text-gray-800 dark:text-gray-200 p-4 mb-2 bg-gray-50 dark:bg-gray-700 rounded-lg relative">
+                <div class="text-container text-xl italic text-gray-800 dark:text-gray-200 p-4 mb-2 bg-gray-50 dark:bg-gray-700 rounded-lg relative">
                     <div id="measureText{{ loop.index }}" class="font-mono whitespace-pre-wrap leading-relaxed invisible absolute top-0 left-0 right-0 pt-4 px-4">{{ review.text }}</div>
-                    <p id="reviewText{{ loop.index }}" class="font-mono whitespace-pre-wrap leading-relaxed -mb-1"></p>
+                    <p id="reviewText{{ loop.index }}" class="font-mono whitespace-pre-wrap leading-relaxed -mb-1">{{ review.text }}</p>
                 </div>
             </div>
             
@@ -37,6 +35,9 @@
                 <p class="text-gray-600 dark:text-gray-400">
                     Container height: <span id="containerHeight{{ loop.index }}">Measuring...</span>
                 </p>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Votes: 🎧 {{ review.votes_headphones }} | 🍷 {{ review.votes_wine }}
+                </p>
             </div>
         </div>
         {% endfor %}
@@ -45,19 +46,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    {% for review in test_reviews %}
-        initializeReview(
-            {{ review.text|tojson|safe }},
-            {{ loop.index }},
-            'measureText{{ loop.index }}',
-            'reviewText{{ loop.index }}'
-        );
+    {% for review in reviews %}
+        initializeContainer({{ loop.index }});
     {% endfor %}
 });
 
-function initializeReview(reviewText, index, measureId, textId) {
-    const measureDiv = document.getElementById(measureId);
-    const textContainer = document.getElementById(textId);
+function initializeContainer(index) {
+    const measureDiv = document.getElementById(`measureText${index}`);
+    const textContainer = document.getElementById(`reviewText${index}`);
     
     // Force a layout calculation
     void measureDiv.offsetHeight;
@@ -73,11 +69,8 @@ function initializeReview(reviewText, index, measureId, textId) {
     document.getElementById(`containerHeight${index}`).textContent = 
         `${measuredHeight}px`;
     
-    // Remove the measurement div
+    // Remove the measurement div since we don't need it anymore
     measureDiv.remove();
-    
-    // Start typing animation
-    typeText(reviewText, textId);
 }
 </script>
 {% endblock %} 

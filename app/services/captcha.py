@@ -1,11 +1,10 @@
-from flask import session
+from flask import session, current_app
 from captcha.image import ImageCaptcha
 import base64, random
 from io import BytesIO
 
 class CaptchaService:
     ALLOWED_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'  # Removed confusing chars
-    CAPTCHA_LENGTH = 5
     
     @staticmethod
     def generate_captcha():
@@ -23,7 +22,8 @@ class CaptchaService:
         )
 
         # Generate random text using allowed chars
-        captcha_text = ''.join(random.choices(CaptchaService.ALLOWED_CHARS, k=CaptchaService.CAPTCHA_LENGTH))
+        length = current_app.config['CAPTCHA_LENGTH']
+        captcha_text = ''.join(random.choices(CaptchaService.ALLOWED_CHARS, k=length))
         
         # Generate image
         buffered = BytesIO()

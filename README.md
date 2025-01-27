@@ -99,9 +99,7 @@ You can install the required Python packages using pip. It is recommended to use
    python run.py
    ```
 
-   On first run, you'll be automatically redirected to the setup page where you can:
-   - Create your admin account
-   - Optionally import initial reviews from a JSON file
+   In the admin dashboard you can import initial reviews from a JSON file.
 
    The JSON file for importing reviews should follow this structure:
    ```json
@@ -115,16 +113,9 @@ You can install the required Python packages using pip. It is recommended to use
    ]
    ```
 
-   If you don't import reviews during setup, you can:
-   - Add reviews manually through the admin interface
-   - Import reviews later through the admin dashboard
-   - Let users submit reviews (which you can moderate)
+   If you don't import reviews, you can add reviews manually through the admin interface or let users submit reviews (which you can moderate).
 
-   To export your existing database to this format, use:
-   ```bash
-   python export_db.py
-   ```
-   This creates a `reviews_export.json` file you can use for backups or migrations.
+   You can export the reviews and vote counts from the admin dashboard.
 
 ## Running the Application
 
@@ -156,12 +147,6 @@ export FLASK_DEBUG=0
 export SECRET_KEY=your-secure-secret-key
 ```
 
-Initialize the DB with these variables set
-
-```bash
-python init_db.py
-```
-
 Then start the application with Gunicorn:
 
 ```bash
@@ -180,6 +165,63 @@ Once running, you can access the application through your web browser:
 - Development: `http://127.0.0.1:5000/`
 - Production: Depends on your server configuration and domain setup
 
+## Deployment
+
+### Environment Setup
+
+1. **Copy Environment Template**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Configure Environment Variables**
+
+   Required for Production:
+   - `FLASK_ENV`: Set to "production"
+   - `SECRET_KEY`: Set a secure random string
+   - `DATABASE_URL`: Your database connection URL
+
+   Optional Settings:
+   - `CAPTCHA_LENGTH`: CAPTCHA complexity (default: 4)
+
+3. **Install Production Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Production Deployment
+
+1. **Set Production Environment**
+   ```bash
+   export FLASK_APP=app
+   export FLASK_ENV=production
+   export FLASK_DEBUG=0
+   ```
+
+2. **Run with Gunicorn**
+   ```bash
+   gunicorn -w 4 -b 0.0.0.0:5000 "run:app"
+   ```
+
+   Adjust the number of workers (-w) based on your server's CPU cores.
+
+3. **Initialize Database**
+   When the application starts for the first time, the database will be setup with the admin user account 
+   configured in the flask environment settings. You can then login to populate data in the database.
+
+### Security Considerations
+
+1. **Secret Key**
+   - Generate a secure random key:
+     ```bash
+     python -c "import secrets; print(secrets.token_hex(32))"
+     ```
+   - Set this as your `SECRET_KEY` in .env
+
+2. **Admin Password**
+   - Set a strong `ADMIN_PASSWORD` in .env
+
+
 ## Admin Access
 To access the admin dashboard, login using the admin user during the database initialization.
 
@@ -188,3 +230,4 @@ Contributions are welcome! If you have suggestions for improvements or new featu
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+

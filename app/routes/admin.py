@@ -1,17 +1,14 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, abort, current_app
 from app.models.review import Review, PendingReview
 from app.models.user import User
-from app.models.rate_limit import RateLimit
 from app.utils.decorators import login_required
 from app.extensions import db
 import random
 from app.services.review import ReviewService
 from app.services.rate_limit import RateLimitService
+import json
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
-
-SEED_VOTES_MIN = 10
-SEED_VOTES_MAX = 20
 
 @admin_bp.route('/dashboard')
 @login_required
@@ -145,4 +142,80 @@ def seed_reviews():
         return jsonify({'success': True})
     
     flash('Reviews seeded successfully!', 'success')
-    return redirect(url_for('admin.manage_reviews')) 
+    return redirect(url_for('admin.manage_reviews'))
+
+@admin_bp.route('/export-reviews', methods=['GET'])
+@login_required
+def export_reviews():
+    """Export all reviews to a JSON file"""
+    reviews = Review.query.all()
+    export_data = [{
+        'text': review.text,
+        'votes_headphones': review.votes_headphones,
+        'votes_wine': review.votes_wine,
+        'created_at': review.created_at.isoformat() if review.created_at else None
+    } for review in reviews]
+    
+    # Create the JSON response with appropriate headers
+    response = jsonify(export_data)
+    response.headers['Content-Disposition'] = 'attachment; filename=reviews_export.json'
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+@admin_bp.route('/import-reviews', methods=['POST'])
+@login_required
+def import_reviews():
+    """Import reviews from a JSON file"""
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'message': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'No selected file'}), 400
+    
+    if not file.filename.lower().endswith('.json'):
+        return jsonify({'success': False, 'message': 'Invalid file type. Must be JSON'}), 400
+    
+    try:
+        # Read and parse JSON
+        reviews_data = json.load(file)
+        
+        # Validate JSON structure
+        if not isinstance(reviews_data, list):
+            return jsonify({'success': False, 'message': 'Invalid JSON format'}), 400
+        
+        # Optional: Clear existing reviews if checkbox is checked
+        clear_existing = request.form.get('clear_existing', 'false').lower() == 'true'
+        if clear_existing:
+            Review.query.delete()
+        
+        # Import reviews
+        imported_count = 0
+        for review_data in reviews_data:
+            review = Review(
+                text=review_data.get('text', ''),
+                votes_headphones=review_data.get('votes_headphones', 0),
+                votes_wine=review_data.get('votes_wine', 0)
+            )
+            db.session.add(review)
+            imported_count += 1
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'message': f'{imported_count} reviews imported successfully'
+        })
+    
+    except json.JSONDecodeError:
+        return jsonify({'success': False, 'message': 'Invalid JSON file'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@admin_bp.route('/database-management')
+@login_required
+def database_management():
+    """Render database management page"""
+    return render_template('database_management.html') 

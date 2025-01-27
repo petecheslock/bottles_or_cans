@@ -1,5 +1,6 @@
 from tests.base import BaseTestCase
 from app.models.review import Review
+from sqlalchemy import text
 
 class TestAdminRoutes(BaseTestCase):
     def setUp(self):
@@ -81,6 +82,23 @@ class TestAdminRoutes(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'IP address unblocked successfully', response.data)
 
+    def test_rate_limits_management_errors(self):
+        """Test error handling in rate limits management"""
+        # Test deleting non-existent rate limit
+        response = self.client.post('/admin/rate-limits', data={
+            'ip_address': '1.1.1.1',
+            'action': 'delete'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Rate limit record not found', response.data)
+        
+        # Test invalid action
+        response = self.client.post('/admin/rate-limits', data={
+            'ip_address': '1.1.1.1',
+            'action': 'invalid'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
     def test_delete_review(self):
         """Test review deletion"""
         review = self.create_test_review()
@@ -100,19 +118,29 @@ class TestAdminRoutes(BaseTestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_seed_reviews(self):
-        """Test seeding reviews with votes"""
-        # Create a review to seed
-        review = self.create_test_review()
-        initial_votes = review.votes_headphones
+        """Test seeding reviews with random votes"""
+        # Create some test reviews
+        review1 = self.create_test_review()
+        review2 = self.create_test_review()
         
+        # Test AJAX request
         response = self.client.post('/admin/seed-reviews', 
-                                  follow_redirects=True)
+                                  headers={'X-Requested-With': 'XMLHttpRequest'})
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'success', response.data)
+        self.assertTrue(response.json['success'])
         
-        # Verify votes were seeded
-        updated_review = self.db.session.get(Review, review.id)
-        self.assertNotEqual(updated_review.votes_headphones, initial_votes)
+        # Test regular request
+        response = self.client.post('/admin/seed-reviews', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Reviews seeded successfully', response.data)
+        
+        # Verify votes were updated
+        updated_review1 = self.db.session.get(Review, review1.id)
+        updated_review2 = self.db.session.get(Review, review2.id)
+        self.assertGreaterEqual(updated_review1.votes_headphones, 0)
+        self.assertLessEqual(updated_review1.votes_headphones, 100)
+        self.assertGreaterEqual(updated_review1.votes_wine, 0)
+        self.assertLessEqual(updated_review1.votes_wine, 100)
 
     def test_seed_reviews_ajax(self):
         """Test seeding reviews via AJAX request"""
@@ -133,3 +161,14 @@ class TestAdminRoutes(BaseTestCase):
         # Verify votes were updated
         updated_review = self.db.session.get(Review, review.id)
         self.assertNotEqual(updated_review.votes_headphones, initial_votes) 
+
+    def test_reset_all_votes_error(self):
+        """Test error handling in reset all votes"""
+        # Force an error by deleting the reviews table
+        self.db.session.execute(text('DROP TABLE reviews'))
+        self.db.session.commit()
+        
+        response = self.client.post('/admin/reset-all-votes')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json['success'])
+        self.assertIn('message', response.json)

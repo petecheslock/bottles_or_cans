@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Loading Modal (used for both import and export) -->
+<div id="loading-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-auto">
+        <div class="text-center">
+            <div class="inline-block animate-spin mb-4">
+                <i class="bi bi-arrow-repeat text-4xl text-blue-500"></i>
+            </div>
+            <h3 id="modal-title" class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Preparing Download
+            </h3>
+            <p id="modal-message" class="text-gray-500 dark:text-gray-400">
+                Your file will be ready in a moment...
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 mt-12">
+    <h1 class="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Database Management</h1>
+
+    <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <!-- Export Card -->
+        <div class="w-full">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center h-full flex flex-col">
+                <div class="text-5xl mb-4 text-green-600 dark:text-green-400">
+                    <i class="bi bi-cloud-download"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Export Reviews</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">Export all reviews to JSON for backup</p>
+                
+                <div class="mt-auto">
+                    <button id="export-reviews-btn" 
+                            class="inline-flex items-center justify-center px-4 py-2 w-full
+                                   bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600
+                                   text-white font-medium rounded-lg
+                                   transition-colors duration-200
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        <i class="bi bi-download mr-2"></i>
+                        <span>Export Reviews</span>
+                    </button>
+                    <div id="export-result" class="mt-4 text-center min-h-[24px]"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Card -->
+        <div class="w-full">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center h-full flex flex-col">
+                <div class="text-5xl mb-4 text-blue-600 dark:text-blue-400">
+                    <i class="bi bi-cloud-upload"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Import Reviews</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">Import reviews from JSON file</p>
+                
+                <form id="import-reviews-form" enctype="multipart/form-data" class="mt-auto">
+                    <div class="mb-4">
+                        <button type="button" 
+                                onclick="document.getElementById('file-upload').click()" 
+                                class="inline-flex items-center justify-center px-4 py-2 w-full
+                                       bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600
+                                       text-gray-700 dark:text-gray-200 font-medium rounded-lg
+                                       transition-colors duration-200
+                                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                            <i class="bi bi-folder2-open mr-2"></i>
+                            <span>Browse for JSON file</span>
+                        </button>
+                        <input type="file" 
+                               name="file" 
+                               accept=".json" 
+                               class="hidden"
+                               id="file-upload">
+                        <p id="file-name" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
+                    </div>
+                    
+                    <label class="inline-flex items-center mb-4">
+                        <input type="checkbox" 
+                               name="clear_existing" 
+                               class="rounded border-gray-300 text-blue-600 
+                                      focus:border-blue-500 focus:ring-blue-500
+                                      dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                            Clear existing reviews
+                        </span>
+                    </label>
+                    
+                    <button type="submit" 
+                            class="inline-flex items-center justify-center px-4 py-2 w-full
+                                   bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600
+                                   text-white font-medium rounded-lg
+                                   transition-colors duration-200
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        <i class="bi bi-upload mr-2"></i>
+                        <span>Import Reviews</span>
+                    </button>
+                    <div id="import-result" class="mt-4 text-center min-h-[24px]"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('file-upload').addEventListener('change', function() {
+    const fileName = this.files[0] ? this.files[0].name : '';
+    document.getElementById('file-name').textContent = fileName ? `Selected: ${fileName}` : '';
+});
+
+// Helper function to show/hide modal with custom text
+function toggleModal(show, title = '', message = '') {
+    const modal = document.getElementById('loading-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMessage = document.getElementById('modal-message');
+    
+    if (show) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+    }
+}
+
+document.getElementById('export-reviews-btn').addEventListener('click', async () => {
+    toggleModal(true, 'Preparing Download', 'Your file will be ready in a moment...');
+    
+    try {
+        const response = await fetch('/admin/export-reviews');
+        if (!response.ok) throw new Error('Export failed');
+        
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reviews_export.json';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toggleModal(false);
+    } catch (error) {
+        toggleModal(false);
+        const resultDiv = document.getElementById('export-result');
+        resultDiv.innerHTML = `
+            <div class="text-red-600 dark:text-red-400 flex items-center justify-center">
+                <i class="bi bi-x-circle mr-2"></i>
+                Export failed
+            </div>
+        `;
+    }
+});
+
+document.getElementById('import-reviews-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const resultDiv = document.getElementById('import-result');
+    
+    toggleModal(true, 'Importing Reviews', 'Processing your file...');
+    
+    try {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const response = await fetch('/admin/import-reviews', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        
+        toggleModal(false);
+        
+        if (data.success) {
+            resultDiv.innerHTML = `
+                <div class="text-green-600 dark:text-green-400 flex items-center justify-center">
+                    <i class="bi bi-check-circle mr-2"></i>
+                    ${data.message}
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="text-red-600 dark:text-red-400 flex items-center justify-center">
+                    <i class="bi bi-x-circle mr-2"></i>
+                    ${data.message}
+                </div>
+            `;
+        }
+    } catch (error) {
+        toggleModal(false);
+        resultDiv.innerHTML = `
+            <div class="text-red-600 dark:text-red-400 flex items-center justify-center">
+                <i class="bi bi-x-circle mr-2"></i>
+                Import failed
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %} 

@@ -1,29 +1,21 @@
-from flask import Flask, url_for, get_flashed_messages
+from flask import Flask, url_for, get_flashed_messages, render_template
 from app.extensions import init_extensions, db
-from app.config import DevelopmentConfig, TestingConfig, ProductionConfig
+from app.config import get_config
 import os
 from app.routes.auth import auth_bp
 from app.routes.admin import admin_bp
 from app.routes.main import bp as main_bp
 
-def create_app(config_object=None):
+def create_app(config_class=None):
     """Application factory function."""
     app = Flask(__name__,
                 template_folder='templates',
                 static_folder='static')
     
-    # Configure the app
-    if config_object is None:
-        # Default configuration based on environment
-        env = os.getenv('FLASK_ENV', 'development')
-        if env == 'production':
-            config_object = ProductionConfig
-        elif env == 'testing':
-            config_object = TestingConfig
-        else:
-            config_object = DevelopmentConfig
-    
-    app.config.from_object(config_object)
+    # Load config
+    if config_class is None:
+        config_class = get_config()
+    app.config.from_object(config_class)
     
     # Set up logging
     if app.debug:

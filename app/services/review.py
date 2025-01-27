@@ -4,8 +4,9 @@ from app.extensions import db
 import random
 
 class ReviewService:
-    SEED_VOTES_MIN = 10
-    SEED_VOTES_MAX = 20
+    SEED_VOTES_MIN = 30
+    SEED_VOTES_MAX = 70
+    SEED_VOTES_RATIO_THRESHOLD = 0.4
     VIRTUAL_VOTES = 10
 
     @staticmethod
@@ -46,11 +47,24 @@ class ReviewService:
 
     @staticmethod
     def create_review(text):
-        """Create a new approved review with seed votes."""
+        """Create a new approved review with balanced seed votes."""
+        while True:
+            votes_headphones = random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
+            votes_wine = random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
+            
+            # Calculate ratio between lower and higher vote count
+            min_votes = min(votes_headphones, votes_wine)
+            max_votes = max(votes_headphones, votes_wine)
+            ratio = min_votes / max_votes
+            
+            # Only accept vote combinations that aren't too skewed
+            if ratio >= ReviewService.SEED_VOTES_RATIO_THRESHOLD:
+                break
+        
         review = Review(
             text=text,
-            votes_headphones=random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX),
-            votes_wine=random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
+            votes_headphones=votes_headphones,
+            votes_wine=votes_wine
         )
         db.session.add(review)
         db.session.commit()
@@ -58,15 +72,27 @@ class ReviewService:
 
     @staticmethod
     def approve_pending_review(review_id):
-        """Approve a pending review and create a new review."""
+        """Approve a pending review and create a new review with balanced votes."""
         pending = db.session.get(PendingReview, review_id)
         if not pending:
             abort(404)
         
+        # Use the same balanced vote generation as create_review
+        while True:
+            votes_headphones = random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
+            votes_wine = random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
+            
+            min_votes = min(votes_headphones, votes_wine)
+            max_votes = max(votes_headphones, votes_wine)
+            ratio = min_votes / max_votes
+            
+            if ratio >= ReviewService.SEED_VOTES_RATIO_THRESHOLD:
+                break
+        
         review = Review(
             text=pending.text,
-            votes_headphones=random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX),
-            votes_wine=random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
+            votes_headphones=votes_headphones,
+            votes_wine=votes_wine
         )
         
         pending.status = 'approved'

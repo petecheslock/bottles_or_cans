@@ -17,28 +17,6 @@ jobs:
       with:
         python-version: '3.11'
         cache: 'pip'
-    
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          ttf-mscorefonts-installer \
-          libfreetype6-dev \
-          fonts-dejavu \
-          libjpeg-dev \
-          zlib1g-dev \
-          libtiff-dev \
-          libfreetype6 \
-          liblcms2-dev \
-          libwebp-dev \
-          tcl8.6-dev \
-          tk8.6-dev \
-          python3-tk \
-          libharfbuzz-dev \
-          libfribidi-dev \
-          libxcb1-dev
-        echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
-        sudo fc-cache -f
 
     - name: Install dependencies
       run: |

@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from tests.base import BaseTestCase
 import json
 from app.models.review import Review
@@ -35,13 +36,19 @@ class TestMainRoutes(BaseTestCase):
         updated_review = self.db.session.get(Review, review.id)
         self.assertEqual(updated_review.votes_headphones, 11)  # 10 + 1
 
-    def test_submit_review(self):
+    @patch('app.services.captcha.CaptchaService.generate_captcha')
+    @patch('app.services.captcha.CaptchaService.verify_captcha')
+    def test_submit_review(self, mock_verify_captcha, mock_generate_captcha):
+        # Mock the captcha generation and verification
+        mock_generate_captcha.return_value = ('dummy_image_data', 'DUMMY')
+        mock_verify_captcha.return_value = True
+        
         # Test submitting review as non-admin
         response = self.client.post('/submit-review', data={
             'review_text': 'New test review',
             'captcha_answer': 'DUMMY'
         }, follow_redirects=True)
-        self.assertEqual(response.status_code, 200) 
+        self.assertEqual(response.status_code, 200)
 
     def test_start_game(self):
         # Create a test review first

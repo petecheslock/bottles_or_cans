@@ -4,10 +4,9 @@ from app.extensions import db
 import random
 
 class ReviewService:
-    SEED_VOTES_MIN = 30
-    SEED_VOTES_MAX = 70
-    SEED_VOTES_RATIO_THRESHOLD = 0.4
     VIRTUAL_VOTES = 10
+    BASE_VOTES = 50  # Base number of votes to start with
+    VARIANCE = 10    # Maximum deviation from base votes
 
     @staticmethod
     def get_random_review():
@@ -48,18 +47,13 @@ class ReviewService:
     @staticmethod
     def create_review(text):
         """Create a new approved review with balanced seed votes."""
-        while True:
-            votes_headphones = random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
-            votes_wine = random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
-            
-            # Calculate ratio between lower and higher vote count
-            min_votes = min(votes_headphones, votes_wine)
-            max_votes = max(votes_headphones, votes_wine)
-            ratio = min_votes / max_votes
-            
-            # Only accept vote combinations that aren't too skewed
-            if ratio >= ReviewService.SEED_VOTES_RATIO_THRESHOLD:
-                break
+        # Generate votes that deviate from BASE_VOTES by at most ±VARIANCE
+        votes_headphones = ReviewService.BASE_VOTES + random.randint(-ReviewService.VARIANCE, ReviewService.VARIANCE)
+        votes_wine = ReviewService.BASE_VOTES + random.randint(-ReviewService.VARIANCE, ReviewService.VARIANCE)
+        
+        # Ensure minimum vote count doesn't go below 1
+        votes_headphones = max(1, votes_headphones)
+        votes_wine = max(1, votes_wine)
         
         review = Review(
             text=text,
@@ -78,16 +72,12 @@ class ReviewService:
             abort(404)
         
         # Use the same balanced vote generation as create_review
-        while True:
-            votes_headphones = random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
-            votes_wine = random.randint(ReviewService.SEED_VOTES_MIN, ReviewService.SEED_VOTES_MAX)
-            
-            min_votes = min(votes_headphones, votes_wine)
-            max_votes = max(votes_headphones, votes_wine)
-            ratio = min_votes / max_votes
-            
-            if ratio >= ReviewService.SEED_VOTES_RATIO_THRESHOLD:
-                break
+        votes_headphones = ReviewService.BASE_VOTES + random.randint(-ReviewService.VARIANCE, ReviewService.VARIANCE)
+        votes_wine = ReviewService.BASE_VOTES + random.randint(-ReviewService.VARIANCE, ReviewService.VARIANCE)
+        
+        # Ensure minimum vote count doesn't go below 1
+        votes_headphones = max(1, votes_headphones)
+        votes_wine = max(1, votes_wine)
         
         review = Review(
             text=pending.text,

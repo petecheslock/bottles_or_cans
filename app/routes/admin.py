@@ -139,12 +139,19 @@ def reset_all_votes():
 @admin_bp.route('/seed-reviews', methods=['POST'])
 @login_required
 def seed_reviews():
-    """Seed reviews with random vote counts"""
+    """Seed reviews with balanced random vote counts"""
     reviews = Review.query.all()
     for review in reviews:
-        # Generate random vote counts between 0 and 100
-        review.votes_headphones = random.randint(0, 100)
-        review.votes_wine = random.randint(0, 100)
+        # Use the same balanced vote generation as ReviewService
+        votes_headphones = ReviewService.BASE_VOTES + random.randint(-ReviewService.VARIANCE, ReviewService.VARIANCE)
+        votes_wine = ReviewService.BASE_VOTES + random.randint(-ReviewService.VARIANCE, ReviewService.VARIANCE)
+        
+        # Ensure minimum vote count doesn't go below 1
+        votes_headphones = max(1, votes_headphones)
+        votes_wine = max(1, votes_wine)
+        
+        review.votes_headphones = votes_headphones
+        review.votes_wine = votes_wine
     
     db.session.commit()
 

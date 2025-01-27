@@ -8,12 +8,9 @@
        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
            <!-- Review Text Section - Keep original padding -->
            <div class="p-8 border-b border-gray-200 dark:border-gray-700">
-               <div class="max-w-xl mx-auto text-xl italic text-gray-800 dark:text-gray-200 p-4 mb-2 bg-gray-50 dark:bg-gray-700 rounded-lg relative">
-                   <!-- Measurement div - match styling but remove bottom padding -->
-                   <div id="measureText" class="font-mono whitespace-pre-wrap leading-relaxed invisible absolute top-0 left-0 right-0 pt-4 px-4">{{ review.text }}</div>
-                   <!-- Actual text container - add small negative margin to tighten spacing -->
-                   <p id="reviewText" class="font-mono whitespace-pre-wrap leading-relaxed -mb-1"></p>
-               </div>
+               {% with id_suffix = '' %}
+                   {% include 'components/review_container.html' %}
+               {% endwith %}
            </div>
 
            <!-- Voting Section - Reduced top padding -->
@@ -38,7 +35,7 @@
 
                <div class="vote-results {% if has_voted %}block{% else %}hidden{% endif %} p-6 rounded-lg mt-4">
                    <div class="text-center mb-4">
-                       <a href="{{ url_for('index') }}" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">
+                       <a href="{{ url_for('main.index') }}" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full hover:-translate-y-0.5 transition-all duration-300">
                            <i class="bi bi-arrow-right-circle mr-2"></i>Play Again
                        </a>
                    </div>
@@ -68,7 +65,7 @@
                    </div>
                    
                    <div class="text-center mt-4">
-                       <a href="{{ url_for('submit_review') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                       <a href="{{ url_for('main.submit_review') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                            <i class="bi bi-pencil mr-1"></i>Submit your own review
                        </a>
                    </div>
@@ -128,7 +125,7 @@ function submitVote(voteType) {
 
     voteButtons.style.opacity = '0';
     
-    fetch('{{ url_for("vote") }}', {
+    fetch('{{ url_for("main.vote") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

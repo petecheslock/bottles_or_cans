@@ -58,58 +58,11 @@
                     </table>
                 </div>
 
-                <!-- Change Password Modal -->
-                <div id="changePasswordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
-                        <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Change Password</h2>
-                        <form method="POST" action="{{ url_for('change_password') }}" class="space-y-4">
-                            <div>
-                                <label for="current_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Current Password
-                                </label>
-                                <input type="password" 
-                                       id="current_password" 
-                                       name="current_password" 
-                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                       required>
-                            </div>
-                            <div>
-                                <label for="new_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    New Password
-                                </label>
-                                <input type="password" 
-                                       id="new_password" 
-                                       name="new_password" 
-                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                       required>
-                            </div>
-                            <div>
-                                <label for="confirm_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Confirm New Password
-                                </label>
-                                <input type="password" 
-                                       id="confirm_password" 
-                                       name="confirm_password" 
-                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                       required>
-                            </div>
-                            <div class="flex justify-end space-x-6 mt-6">
-                                <button type="button" 
-                                        onclick="hideChangePasswordModal()" 
-                                        class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
-                                    Cancel
-                                </button>
-                                <button type="submit" 
-                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
-                                    Change Password
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <!-- Replace the existing Change Password Modal with this -->
+                {% include 'components/confirm_modal.html' %}
 
                 <div class="mt-8 text-center">
-                    <a href="{{ url_for('admin_dashboard') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                    <a href="{{ url_for('admin.dashboard') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                         <i class="bi bi-arrow-left mr-1"></i>Back to Dashboard
                     </a>
                 </div>
@@ -120,11 +73,92 @@
 
 <script>
 function showChangePasswordModal() {
-    document.getElementById('changePasswordModal').classList.remove('hidden');
-}
+    // First show the modal with basic content
+    showConfirmModal(
+        null,
+        'change-password',
+        'Change Password',
+        ''  // We'll replace this content
+    );
 
-function hideChangePasswordModal() {
-    document.getElementById('changePasswordModal').classList.add('hidden');
+    // Wait for modal to render
+    setTimeout(() => {
+        // Get modal elements with error checking
+        const modalConfirm = document.getElementById('confirmAction');
+        const modalMessage = document.getElementById('modalMessage');
+        const modal = document.getElementById('confirmModal');
+        
+        if (!modalConfirm || !modalMessage || !modal) {
+            console.error('Could not find modal elements');
+            return;
+        }
+
+        // Add click outside to close
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                hideConfirmModal();
+            }
+        });
+
+        // Set the form content
+        modalMessage.innerHTML = `
+            <form id="changePasswordForm" method="POST" action="{{ url_for('auth.change_password') }}" class="space-y-4">
+                <div>
+                    <label for="current_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Current Password
+                    </label>
+                    <input type="password" 
+                           id="current_password" 
+                           name="current_password" 
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                           required>
+                </div>
+                <div>
+                    <label for="new_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        New Password
+                    </label>
+                    <input type="password" 
+                           id="new_password" 
+                           name="new_password" 
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                           required>
+                </div>
+                <div>
+                    <label for="confirm_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Confirm New Password
+                    </label>
+                    <input type="password" 
+                           id="confirm_password" 
+                           name="confirm_password" 
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                           required>
+                </div>
+            </form>
+        `;
+
+        // Clone and replace the confirm button
+        const newModalConfirm = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
+
+        // Update confirm button text
+        newModalConfirm.textContent = 'Change Password';
+
+        // Add the click handler
+        newModalConfirm.addEventListener('click', function() {
+            document.getElementById('changePasswordForm').submit();
+        });
+
+        // Add keyboard support
+        function handleKeyPress(e) {
+            if (e.key === 'Enter' && !modal.classList.contains('hidden')) {
+                e.preventDefault();
+                newModalConfirm.click();
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyPress);
+    }, 100);
 }
 </script>
 {% endblock %}

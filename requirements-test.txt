@@ -1,5 +1,7 @@
-pytest
-coverage
-pytest-cov 
+pytest>=8.3.4
+coverage>=7.6.10
+pytest-cov>=6.0.0
+selenium>=4.16.0
+webdriver-manager>=4.0.1
 selenium>=4.16.0
 webdriver-manager>=4.0.1

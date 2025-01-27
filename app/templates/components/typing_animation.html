@@ -19,11 +19,11 @@
 <script>
 // Centralized typing speed configuration
 const TYPING_CONFIG = {
-    baseSpeed: 20,          // Base milliseconds between characters
-    variation: 10,          // Random variation range (±10ms)
-    sentencePause: 100,     // Extra pause after .!?
-    clausePause: 50,        // Extra pause after ,;:
-    finalDelay: 300        // Delay before showing next content
+    baseSpeed: 15,          // Reduced from 20 to 15 ms between characters (25% faster)
+    variation: 8,           // Reduced from 10 to 8 for proportional variation
+    sentencePause: 75,      // Reduced from 100 to 75 ms pause after .!?
+    clausePause: 38,        // Reduced from 50 to 38 ms pause after ,;:
+    finalDelay: 225         // Reduced from 300 to 225 ms before showing next content
 };
 
 function typeText(text, elementId, onComplete = null) {

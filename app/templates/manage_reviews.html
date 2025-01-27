@@ -62,12 +62,22 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-6">
-                                        <a href="{{ url_for('admin_edit_review', review_id=review.id) }}" 
+                                        <a href="{{ url_for('admin.edit_review', review_id=review.id) }}" 
                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 px-4">
                                             <i class="bi bi-pencil mr-1"></i>Edit
                                         </a>
                                         <form method="POST" 
-                                              action="{{ url_for('admin_delete_review', review_id=review.id) }}" 
+                                              action="{{ url_for('admin.reset_votes', review_id=review.id) }}" 
+                                              class="inline" 
+                                              onsubmit="return confirm('Are you sure you want to reset votes for this review?');">
+                                            <button type="button" 
+                                                    onclick="showResetVotesConfirmation({{ review.id }})"
+                                                    class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+                                                <i class="bi bi-arrow-counterclockwise mr-1"></i>Reset Votes
+                                            </button>
+                                        </form>
+                                        <form method="POST" 
+                                              action="{{ url_for('admin.delete_review', review_id=review.id) }}" 
                                               class="inline"
                                               id="deleteForm-{{ review.id }}">
                                             <button type="button" 
@@ -90,7 +100,7 @@
                 </div>
 
                 <div class="mt-8 text-center">
-                    <a href="{{ url_for('admin_manage_reviews') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                    <a href="{{ url_for('admin.manage_reviews') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
                         <i class="bi bi-arrow-left mr-1"></i>Back to Dashboard
                     </a>
                 </div>
@@ -126,7 +136,7 @@ function handleResetVotes() {
     const startTime = Date.now();
     const minimumLoadingTime = 2000; // 2 seconds minimum loading time
 
-    fetch('{{ url_for("reset_votes") }}', {
+    fetch('{{ url_for("admin.reset_all_votes") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -206,7 +216,7 @@ function handleSeedVotes() {
     const startTime = Date.now();
     const minimumLoadingTime = 2000;
 
-    fetch('{{ url_for("seed_reviews") }}', {
+    fetch('{{ url_for("admin.seed_reviews") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -289,5 +299,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function showResetVotesConfirmation(reviewId) {
+    showConfirmModal(
+        reviewId,
+        'reset-single',
+        'Confirm Reset Votes',
+        'Are you sure you want to reset the vote counts to zero for this review?'
+    );
+
+    setTimeout(() => {
+        const modal = document.getElementById('confirmModal');
+        const modalConfirm = document.getElementById('confirmAction');
+        if (!modalConfirm) {
+            console.error('Could not find confirm button');
+            return;
+        }
+
+        // Clone and replace the confirm button
+        const newModalConfirm = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
+
+        // Add the click handler
+        newModalConfirm.addEventListener('click', function() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ url_for('admin.reset_votes', review_id=0) }}".replace('0', reviewId);
+            document.body.appendChild(form);
+            form.submit();
+        });
+
+        // Add keyboard support
+        function handleKeyPress(e) {
+            if (e.key === 'Enter' && !modal.classList.contains('hidden')) {
+                e.preventDefault();
+                newModalConfirm.click();
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyPress);
+    }, 100);
+}
 </script>
 {% endblock %}

@@ -9,7 +9,7 @@ def datetime_handler(obj):
 
 def export_reviews():
     # Connect to the database
-    conn = sqlite3.connect('instance/bottles_or_cans.db')
+    conn = sqlite3.connect('instance/dev.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 

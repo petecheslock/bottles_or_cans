@@ -18,7 +18,7 @@
 
    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
        <!-- Add Review -->
-       <a href="{{ url_for('submit_review') }}" class="w-full max-w-sm">
+       <a href="{{ url_for('main.submit_review') }}" class="w-full max-w-sm">
            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
                <div class="text-5xl mb-4 text-blue-600 dark:text-blue-400">
                    <i class="bi bi-plus-circle"></i>
@@ -29,7 +29,7 @@
        </a>
 
        <!-- Manage Reviews -->
-       <a href="{{ url_for('admin_manage_reviews') }}" class="w-full max-w-sm">
+       <a href="{{ url_for('admin.manage_reviews') }}" class="w-full max-w-sm">
            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
                <div class="text-5xl mb-4 text-green-600 dark:text-green-400">
                    <i class="bi bi-gear"></i>
@@ -40,7 +40,7 @@
        </a>
 
        <!-- Pending Reviews -->
-       <a href="{{ url_for('pending_reviews') }}" class="w-full max-w-sm">
+       <a href="{{ url_for('admin.pending_reviews') }}" class="w-full max-w-sm">
            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
                <div class="text-5xl mb-4 text-yellow-500 dark:text-yellow-400">
                    <i class="bi bi-inbox"></i>
@@ -51,7 +51,7 @@
        </a>
 
        <!-- User Management -->
-       <a href="{{ url_for('manage_users') }}" class="w-full max-w-sm">
+       <a href="{{ url_for('admin.manage_users') }}" class="w-full max-w-sm">
            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
                <div class="text-5xl mb-4 text-cyan-500 dark:text-cyan-400">
                    <i class="bi bi-people"></i>
@@ -62,7 +62,7 @@
        </a>
 
        <!-- Rate Limits -->
-       <a href="{{ url_for('manage_rate_limits') }}" class="w-full max-w-sm">
+       <a href="{{ url_for('admin.manage_rate_limits') }}" class="w-full max-w-sm">
            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
                <div class="text-5xl mb-4 text-purple-600 dark:text-purple-400">
                    <i class="bi bi-shield-lock"></i>
@@ -73,7 +73,7 @@
        </a>
 
        <!-- Text Display Test -->
-       <a href="{{ url_for('test_text_display') }}" class="w-full max-w-sm">
+       <a href="{{ url_for('admin.test_text_display') }}" class="w-full max-w-sm">
            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center h-full transform transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
                <div class="text-5xl mb-4 text-purple-600 dark:text-purple-400">
                    <i class="bi bi-textarea-t"></i>

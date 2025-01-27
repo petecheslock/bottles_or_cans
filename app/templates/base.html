@@ -24,7 +24,7 @@
     <nav class="bg-slate-800 dark:bg-gray-950 shadow-md animate__animated animate__fadeIn">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap justify-between items-center py-3">
-                <a class="text-white text-lg font-semibold hover:text-gray-200 transition-colors duration-300" href="{{ url_for('index') }}">
+                <a class="text-white text-lg font-semibold hover:text-gray-200 transition-colors duration-300" href="{{ url_for('main.index') }}">
                     <i class="bi bi-headphones mr-2"></i><i class="fa-solid fa-wine-bottle mx-2"></i>Bottles or Cans?
                 </a>
                 <button class="mobile-menu-toggle lg:hidden text-white" type="button">
@@ -34,27 +34,27 @@
                 </button>
                 <div class="hidden lg:flex lg:items-center" id="navbarNav">
                     <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 items-center">
-                        <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('play_game') }}">
+                        <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('main.play_game') }}">
                             <i class="bi bi-controller mr-1"></i>Play
                         </a>
                         {% if session.get('logged_in') %}
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin_dashboard') }}">
+                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin.dashboard') }}">
                                 <i class="bi bi-house-door mr-1"></i>Home
                             </a>
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('submit_review') }}">
+                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('main.submit_review') }}">
                                 <i class="bi bi-plus-circle mr-1"></i>Add Review
                             </a>
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin_manage_reviews') }}">
+                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin.manage_reviews') }}">
                                 <i class="bi bi-gear mr-1"></i>Manage
                             </a>
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('pending_reviews') }}">
+                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin.pending_reviews') }}">
                                 <i class="bi bi-inbox mr-1"></i>Pending Reviews
                             </a>
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin_logout') }}">
+                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('auth.logout') }}">
                                 <i class="bi bi-box-arrow-right mr-1"></i>Logout
                             </a>
                         {% else %}
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin_login') }}">
+                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('auth.login') }}">
                                 <i class="bi bi-person mr-1"></i>Admin
                             </a>
                         {% endif %}

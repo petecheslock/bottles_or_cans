@@ -17,7 +17,12 @@ jobs:
       with:
         python-version: '3.11'
         cache: 'pip'
-
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libfreetype6-dev fonts-dejavu
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

@@ -88,44 +88,58 @@ def submit_review():
     if request.method == 'POST':
         text = request.form.get('review_text', '').strip()
         
+        # Check if it's an AJAX request
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        
         # Validate review text
         if not text:
+            if is_ajax:
+                return jsonify({'success': False, 'error': 'Review text is required'}), 400
             flash('Review text is required', 'error')
-            return render_template('submit_review.html', 
-                                is_admin=is_admin), 400
+            return render_template('submit_review.html', is_admin=is_admin), 400
         
-        if len(text) > 500:  # Match the model's max length
+        if len(text) > 500:
+            if is_ajax:
+                return jsonify({'success': False, 'error': 'Review text too long'}), 400
             flash('Review text too long', 'error')
-            return render_template('submit_review.html', 
-                                is_admin=is_admin), 400
+            return render_template('submit_review.html', is_admin=is_admin), 400
 
-        # Check rate limit first
+        # Check rate limit
         if not is_admin and not RateLimitService.check_rate_limit(request.remote_addr):
+            if is_ajax:
+                return jsonify({'success': False, 'error': 'Too many submissions. Please try again later.'}), 429
             flash('Too many submissions. Please try again later.', 'error')
-            # Generate new captcha for the form
-            captcha_image, answer = CaptchaService.generate_captcha()
-            session['captcha_answer'] = answer
-            return render_template('submit_review.html', 
-                                is_admin=is_admin,
-                                captcha_image=captcha_image), 429
+            return render_template('submit_review.html', is_admin=is_admin), 429
         
         if is_admin:
-            # Admin submissions bypass captcha and go straight to approved reviews
+            # Admin submissions bypass captcha
             ReviewService.create_review(text)
+            if is_ajax:
+                return jsonify({
+                    'success': True,
+                    'redirect_url': url_for('admin.manage_reviews')
+                })
             flash('Review added successfully!', 'success')
             return redirect(url_for('admin.manage_reviews'))
         else:
-            # Regular user submissions need captcha and go to pending
+            # Regular user submissions need captcha
             captcha_answer = request.form.get('captcha_answer')
             stored_answer = session.get('captcha_answer')
             
             if not CaptchaService.verify_captcha(captcha_answer, stored_answer):
+                if is_ajax:
+                    return jsonify({'success': False, 'error': 'Invalid captcha. Please try again.'})
                 flash('Invalid captcha. Please try again.', 'error')
                 return redirect(url_for('main.submit_review'))
             
             ReviewService.create_pending_review(text, request.remote_addr)
-            return render_template('submit_thanks.html', is_admin=False)
-    
+            if is_ajax:
+                return jsonify({
+                    'success': True,
+                    'redirect_url': url_for('main.thank_you')  # Changed endpoint name
+                })
+            return redirect(url_for('main.thank_you'))  # Changed endpoint name
+
     # GET request - show the form
     if not is_admin:
         captcha_image, answer = CaptchaService.generate_captcha()
@@ -136,6 +150,11 @@ def submit_review():
     return render_template('submit_review.html', 
                          is_admin=is_admin,
                          captcha_image=captcha_image)
+
+@bp.route('/thank-you')  # Add this new route
+def thank_you():
+    """Thank you page after submitting a review."""
+    return render_template('submit_thanks.html', is_admin=False)
 
 @bp.route('/refresh-captcha', methods=['POST'])
 def refresh_captcha():

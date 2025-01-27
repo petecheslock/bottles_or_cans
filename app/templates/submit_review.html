@@ -20,7 +20,7 @@
                     {% endif %}
                 {% endwith %}
 
-                <form method="POST" class="space-y-6">
+                <form id="submitReviewForm" method="POST" class="space-y-6">
                     <div>
                         <label for="review_text" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Review Text
@@ -151,6 +151,74 @@ document.addEventListener('DOMContentLoaded', function() {
             message.classList.add('opacity-0');
             setTimeout(() => message.remove(), 300);
         }, 5000);
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('submitReviewForm');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonHtml = submitButton.innerHTML;
+        
+        // Show loading state
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+            <i class="bi bi-arrow-repeat animate-spin mr-2"></i>
+            Submitting...
+        `;
+
+        const formData = new FormData(form);
+
+        fetch('{{ url_for("main.submit_review") }}', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect on success
+                window.location.href = data.redirect_url;
+            } else {
+                // Remove any existing error messages
+                const existingErrors = form.querySelectorAll('.error-message');
+                existingErrors.forEach(error => error.remove());
+                
+                // Show error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message p-4 mb-4 rounded-lg bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 flex justify-between items-center animate__animated animate__fadeIn';
+                errorDiv.innerHTML = `
+                    ${data.error}
+                    <button type="button" class="text-lg font-semibold" onclick="this.parentElement.remove()">×</button>
+                `;
+                
+                // Insert error message at the top of the form
+                form.insertBefore(errorDiv, form.firstChild);
+                
+                // Clear only the captcha input
+                const captchaInput = document.getElementById('captcha_answer');
+                if (captchaInput) {
+                    captchaInput.value = '';
+                    captchaInput.focus();
+                }
+                
+                // Refresh the captcha image
+                refreshCaptcha();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            // Reset submit button
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonHtml;
+        });
     });
 });
 </script>

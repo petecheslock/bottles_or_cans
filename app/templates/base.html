@@ -46,11 +46,13 @@
                 </button>
                 <div class="hidden lg:flex lg:items-center" id="navbarNav">
                     <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 items-center">
-                        <a href="{{ url_for('main.play_game') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                        <a href="{{ url_for('main.play_game') }}" 
+                           class="text-white dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
                             <i class="bi bi-controller mr-1"></i>Play Game
                         </a>
-                        <a href="{{ url_for('main.submit_review') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
-                            <i class="bi bi-plus-circle mr-1"></i>Submit Review
+                        <a href="{{ url_for('main.submit_review') }}" 
+                           class="text-white dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                            <i class="bi bi-pencil mr-1"></i>Submit Review
                         </a>
                         {% if session.get('logged_in') %}
                             <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin.dashboard') }}">

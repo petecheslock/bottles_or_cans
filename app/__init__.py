@@ -32,6 +32,9 @@ def create_app(config_class=None):
     # Register template context processors
     register_template_processors(app)
     
+    # Register error handlers
+    register_error_handlers(app)
+    
     return app
 
 def register_blueprints(app):
@@ -55,7 +58,7 @@ def register_template_processors(app):
 def register_error_handlers(app):
     """Register error handlers."""
     @app.errorhandler(404)
-    def not_found_error(error):
+    def page_not_found(error):
         return render_template('errors/404.html'), 404
 
     @app.errorhandler(500)

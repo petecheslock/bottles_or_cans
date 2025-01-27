@@ -40,8 +40,7 @@ def init_admin_user(app):
             except Exception as e:
                 app.logger.error(f"Failed to create admin user: {str(e)}")
                 sys.exit(1)
-        else:
-            app.logger.info("Admin user already exists")
+
 
 def init_extensions(app):
     """Initialize Flask extensions."""

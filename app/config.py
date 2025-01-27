@@ -17,6 +17,8 @@ class Config:
     CAPTCHA_LENGTH = int(os.getenv('CAPTCHA_LENGTH', 4))
     MAX_REVIEW_LENGTH = int(os.getenv('MAX_REVIEW_LENGTH', 500))
     
+    GA_MEASUREMENT_ID = os.environ.get('GA_MEASUREMENT_ID', '')
+    
     @classmethod
     def validate_config(cls):
         """Validate configuration settings"""

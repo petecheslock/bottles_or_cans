@@ -35,6 +35,12 @@ def create_app(config_class=None):
     # Register error handlers
     register_error_handlers(app)
     
+    @app.context_processor
+    def utility_processor():
+        return {
+            'ga_measurement_id': app.config.get('GA_MEASUREMENT_ID')
+        }
+    
     return app
 
 def register_blueprints(app):

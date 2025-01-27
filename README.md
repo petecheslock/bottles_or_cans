@@ -115,6 +115,12 @@ You can install the required Python packages using pip. It is recommended to use
    
    If you don't provide a reviews file, the database will start empty and you can populate reviews manually through the web UI.
    
+   To export your existing database to this format, run:
+   ```bash
+   python export_db.py
+   ```
+   This will create a `reviews_export.json` file that you can use to restore your database later.
+   
    Run the database initialization script to create the necessary tables and import reviews:
    ```bash
    python init_db.py

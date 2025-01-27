@@ -36,6 +36,8 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
+    ADMIN_USERNAME = 'admin_test'
+    ADMIN_PASSWORD = 'test_password'
     SERVER_NAME = 'localhost'
 
 class ProductionConfig(Config):

@@ -94,10 +94,16 @@ You can install the required Python packages using pip. It is recommended to use
    npm run build
    ```
 
-5. **Prepare the Database**
-   - You can seed the database with reviews using a JSON file in the same directory as the application.
-   
-   Use this structure:
+5. **Start the Application**
+   ```bash
+   python run.py
+   ```
+
+   On first run, you'll be automatically redirected to the setup page where you can:
+   - Create your admin account
+   - Optionally import initial reviews from a JSON file
+
+   The JSON file for importing reviews should follow this structure:
    ```json
    [
      {
@@ -108,23 +114,17 @@ You can install the required Python packages using pip. It is recommended to use
      }
    ]
    ```
-   
-   - The `text` field contains the review content
-   - `votes_headphones` and `votes_wine` track the number of votes for each category
-   - `created_at` is optional and will default to the current time if not provided
-   
-   If you don't provide a reviews file, the database will start empty and you can populate reviews manually through the web UI.
-   
-   To export your existing database to this format, run:
+
+   If you don't import reviews during setup, you can:
+   - Add reviews manually through the admin interface
+   - Import reviews later through the admin dashboard
+   - Let users submit reviews (which you can moderate)
+
+   To export your existing database to this format, use:
    ```bash
    python export_db.py
    ```
-   This will create a `reviews_export.json` file that you can use to restore your database later.
-   
-   Run the database initialization script to create the necessary tables and import reviews:
-   ```bash
-   python init_db.py
-   ```
+   This creates a `reviews_export.json` file you can use for backups or migrations.
 
 ## Running the Application
 

@@ -42,3 +42,32 @@ class TestMainRoutes(BaseTestCase):
             'captcha_answer': 'DUMMY'
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 200) 
+
+    def test_start_game(self):
+        # Create a test review first
+        self.create_test_review()
+        
+        response = self.client.get('/start', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        with self.client.session_transaction() as sess:
+            self.assertTrue(sess.get('seen_landing'))
+
+    def test_submit_review_as_admin(self):
+        # Login as admin first
+        self.login_admin()
+        
+        response = self.client.post('/submit-review', data={
+            'review_text': 'Admin review test'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Review added successfully', response.data)
+
+    def test_submit_review_rate_limited(self):
+        # Create rate limit
+        self.create_rate_limit('127.0.0.1', 6)  # Over limit
+        
+        response = self.client.post('/submit-review', data={
+            'review_text': 'Test review',
+            'captcha_answer': 'DUMMY'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 429) 

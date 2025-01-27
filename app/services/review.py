@@ -109,4 +109,14 @@ class ReviewService:
     @classmethod
     def get_pending_reviews(cls):
         """Get all pending reviews from the database"""
-        return PendingReview.query.filter_by(status='pending').order_by(PendingReview.created_at.desc()).all() 
+        return PendingReview.query.filter_by(status='pending').order_by(PendingReview.created_at.desc()).all()
+
+    @staticmethod
+    def update_review(review_id, text):
+        """Update a review's text."""
+        review = db.session.get(Review, review_id)
+        if review:
+            review.text = text
+            db.session.commit()
+            return review
+        return None 

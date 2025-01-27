@@ -59,59 +59,49 @@ def get_client_ip():
 
 @bp.route('/submit-review', methods=['GET', 'POST'])
 def submit_review():
-    """Handle submission of a new review"""
-    # For GET requests, display the form
-    if request.method == 'GET':
-        # Generate captcha if user is not admin
-        if not session.get('logged_in'):
-            captcha_image, captcha_text = CaptchaService.generate_captcha()
-            session['captcha_text'] = captcha_text
+    """Submit a new review."""
+    is_admin = session.get('logged_in', False)
+
+    if request.method == 'POST':
+        # Check rate limit first
+        if not is_admin and not RateLimitService.check_rate_limit(request.remote_addr):
+            flash('Too many submissions. Please try again later.', 'error')
+            # Generate new captcha for the form
+            captcha_image, answer = CaptchaService.generate_captcha()
+            session['captcha_answer'] = answer
             return render_template('submit_review.html', 
-                                 captcha_image=captcha_image,
-                                 is_admin=False)
-        return render_template('submit_review.html', is_admin=True)
+                                is_admin=is_admin,
+                                captcha_image=captcha_image), 429
 
-    # For POST requests, check rate limit first
-    ip_address = get_client_ip()
-    if not RateLimitService.check_rate_limit(ip_address, limit=5, window=3600):
-        flash('Too many submissions. Please try again later.', 'danger')
-        return render_template('submit_review.html', 
-                             captcha_image=session.get('captcha_image'),
-                             is_admin=session.get('logged_in', False))
-
-    # Handle the submission
-    review_text = request.form.get('review_text')
-    captcha_answer = request.form.get('captcha_answer')
-    
-    # If user is logged in as admin, bypass captcha
-    if session.get('logged_in'):
-        if review_text:
-            ReviewService.create_review(review_text)
-            flash('Review added successfully!', 'success')
-            return redirect(url_for('admin.dashboard'))  # Changed to admin.dashboard to match blueprint
-    else:
-        # Handle non-admin submission
-        if not review_text:
-            flash('Review text is required', 'error')
-            return redirect(url_for('main.submit_review'))
-            
-        if not captcha_answer:
-            flash('Please complete the captcha', 'error')
-            return redirect(url_for('main.submit_review'))
-            
-        # Verify captcha
-        stored_captcha = session.get('captcha_text')
-        if not stored_captcha or captcha_answer.lower() != stored_captcha.lower():
-            flash('Invalid captcha answer', 'error')
-            return redirect(url_for('main.submit_review'))
-            
-        # Clear used captcha
-        session.pop('captcha_text', None)
+        text = request.form.get('review_text')
         
-        ReviewService.create_pending_review(text=review_text, ip_address=ip_address)
-        return render_template('submit_thanks.html', is_admin=False)
+        if is_admin:
+            # Admin submissions bypass captcha and go straight to approved reviews
+            ReviewService.create_review(text)
+            flash('Review added successfully!', 'success')
+            return redirect(url_for('admin.manage_reviews'))
+        else:
+            # Regular user submissions need captcha and go to pending
+            captcha_answer = request.form.get('captcha_answer')
+            stored_answer = session.get('captcha_answer')
+            
+            if not CaptchaService.verify_captcha(captcha_answer, stored_answer):
+                flash('Invalid captcha. Please try again.', 'error')
+                return redirect(url_for('main.submit_review'))
+            
+            ReviewService.create_pending_review(text, request.remote_addr)
+            return render_template('submit_thanks.html', is_admin=False)
     
-    return redirect(url_for('main.submit_review'))
+    # GET request - show the form
+    if not is_admin:
+        captcha_image, answer = CaptchaService.generate_captcha()
+        session['captcha_answer'] = answer
+    else:
+        captcha_image = None
+    
+    return render_template('submit_review.html', 
+                         is_admin=is_admin,
+                         captcha_image=captcha_image)
 
 @bp.route('/refresh-captcha', methods=['POST'])
 def refresh_captcha():

@@ -70,11 +70,6 @@ def get_config():
     else:
         environment = 'development'
     
-    print(f"Current FLASK_ENV: {env}")  # Debug line
-    print(f"Current FLASK_DEBUG: {debug}")  # Debug line
-    print(f"Current DATABASE_URL: {os.getenv('DATABASE_URL')}")  # Debug line
-    
     config_class = config.get(environment, config['default'])
-    print(f"Selected config: {config_class.__name__}")  # Debug line
     config_class.validate_config()
     return config_class

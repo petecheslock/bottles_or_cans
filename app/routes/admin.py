@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, abort
 from app.models.review import Review, PendingReview
 from app.models.user import User
 from app.models.rate_limit import RateLimit
@@ -27,9 +27,12 @@ def manage_reviews():
 @admin_bp.route('/delete-review/<int:review_id>', methods=['POST'])
 @login_required
 def delete_review(review_id):
-    ReviewService.delete_review(review_id)
-    flash('Review deleted successfully!', 'success')
-    return redirect(url_for('admin.manage_reviews'))
+    """Delete a review"""
+    if ReviewService.delete_review(review_id):
+        flash('Review deleted successfully!', 'success')
+        return redirect(url_for('admin.manage_reviews'))
+    else:
+        abort(404)  # Return 404 when review doesn't exist
 
 @admin_bp.route('/edit-review/<int:review_id>', methods=['GET', 'POST'])
 @login_required

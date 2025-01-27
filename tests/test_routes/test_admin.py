@@ -79,4 +79,37 @@ class TestAdminRoutes(BaseTestCase):
             'action': 'unblock'
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'IP address unblocked successfully', response.data) 
+        self.assertIn(b'IP address unblocked successfully', response.data)
+
+    def test_delete_review(self):
+        """Test review deletion"""
+        review = self.create_test_review()
+        
+        # Test successful deletion
+        response = self.client.post(f'/admin/delete-review/{review.id}', 
+                                  follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Review deleted successfully', response.data)
+        
+        # Verify review was deleted
+        self.assertIsNone(self.db.session.get(Review, review.id))
+        
+        # Test deleting non-existent review
+        response = self.client.post('/admin/delete-review/999', 
+                                  follow_redirects=True)
+        self.assertEqual(response.status_code, 404)
+
+    def test_seed_reviews(self):
+        """Test seeding reviews with votes"""
+        # Create a review to seed
+        review = self.create_test_review()
+        initial_votes = review.votes_headphones
+        
+        response = self.client.post('/admin/seed-reviews', 
+                                  follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'success', response.data)
+        
+        # Verify votes were seeded
+        updated_review = self.db.session.get(Review, review.id)
+        self.assertNotEqual(updated_review.votes_headphones, initial_votes) 

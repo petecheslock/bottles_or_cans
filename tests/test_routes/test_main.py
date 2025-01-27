@@ -71,3 +71,38 @@ class TestMainRoutes(BaseTestCase):
             'captcha_answer': 'DUMMY'
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 429) 
+
+    def test_vote_with_invalid_data(self):
+        """Test voting with invalid data"""
+        # Test invalid review_id
+        response = self.client.post('/vote', data={
+            'review_id': 999,
+            'vote_type': 'headphones'
+        })
+        self.assertEqual(response.status_code, 404)
+
+        # Test invalid vote_type
+        review = self.create_test_review()
+        response = self.client.post('/vote', data={
+            'review_id': review.id,
+            'vote_type': 'invalid'
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_submit_review_validation(self):
+        """Test review submission validation"""
+        # Test empty review text
+        response = self.client.post('/submit-review', data={
+            'review_text': '',
+            'captcha_answer': 'DUMMY'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Review text is required', response.data)
+
+        # Test too long review text
+        response = self.client.post('/submit-review', data={
+            'review_text': 'x' * 1001,  # Assuming max length is 1000
+            'captcha_answer': 'DUMMY'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Review text too long', response.data) 

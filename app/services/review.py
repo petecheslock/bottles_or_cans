@@ -87,8 +87,11 @@ class ReviewService:
 
     @classmethod
     def get_all_reviews(cls):
-        """Get all reviews from the database"""
-        return db.session.execute(db.select(Review)).scalars().all()
+        """Get all reviews from the database ordered by creation date"""
+        return db.session.execute(
+            db.select(Review)
+            .order_by(Review.created_at.desc())
+        ).scalars().all()
 
     @staticmethod
     def get_review(review_id):
@@ -119,4 +122,14 @@ class ReviewService:
             review.text = text
             db.session.commit()
             return review
-        return None 
+        return None
+
+    @staticmethod
+    def delete_review(review_id):
+        """Delete a review by ID."""
+        review = db.session.get(Review, review_id)
+        if review:
+            db.session.delete(review)
+            db.session.commit()
+            return True
+        return False 

@@ -36,7 +36,14 @@ def vote():
     review_id = request.form.get('review_id')
     vote_type = request.form.get('vote_type')
     
+    # Validate vote_type
+    if vote_type not in ['headphones', 'wine']:
+        return jsonify({'error': 'Invalid vote type'}), 400
+    
+    # Add vote and get updated review
     review = ReviewService.add_vote(review_id, vote_type)
+    if not review:
+        return jsonify({'error': 'Review not found'}), 404
     
     # Track voted reviews in session
     voted_reviews = session.get('voted_reviews', [])
@@ -63,6 +70,19 @@ def submit_review():
     is_admin = session.get('logged_in', False)
 
     if request.method == 'POST':
+        text = request.form.get('review_text', '').strip()
+        
+        # Validate review text
+        if not text:
+            flash('Review text is required', 'error')
+            return render_template('submit_review.html', 
+                                is_admin=is_admin), 400
+        
+        if len(text) > 500:  # Match the model's max length
+            flash('Review text too long', 'error')
+            return render_template('submit_review.html', 
+                                is_admin=is_admin), 400
+
         # Check rate limit first
         if not is_admin and not RateLimitService.check_rate_limit(request.remote_addr):
             flash('Too many submissions. Please try again later.', 'error')
@@ -72,8 +92,6 @@ def submit_review():
             return render_template('submit_review.html', 
                                 is_admin=is_admin,
                                 captcha_image=captcha_image), 429
-
-        text = request.form.get('review_text')
         
         if is_admin:
             # Admin submissions bypass captcha and go straight to approved reviews

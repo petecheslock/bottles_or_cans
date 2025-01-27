@@ -221,6 +221,7 @@ Once running, you can access the application through your web browser:
 2. **Admin Credentials**
    - Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` in your .env file
    - These will be used to create the admin account on first run
+   - Navigate to /admin/login and use those credentials to access the management console
 
 ### Admin Access
 The admin user is automatically created on first run using the credentials from your .env file.

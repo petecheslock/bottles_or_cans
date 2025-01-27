@@ -73,10 +73,23 @@
                                                 {% endif %}
                                             </button>
                                         </form>
-                                        <button onclick="showDeleteConfirmation('{{ rate_limit.ip_address }}')"
-                                                class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
-                                            <i class="bi bi-trash mr-1"></i>Delete
-                                        </button>
+                                        <form method="POST" 
+                                              action="{{ url_for('admin.manage_rate_limits') }}" 
+                                              class="inline" 
+                                              id="deleteForm-{{ rate_limit.ip_address|replace('.', '_') }}">
+                                            <input type="hidden" name="ip_address" value="{{ rate_limit.ip_address }}">
+                                            <input type="hidden" name="action" value="delete">
+                                            <button type="button" 
+                                                    onclick="showConfirmModal(
+                                                        '{{ rate_limit.ip_address|replace('.', '_') }}',
+                                                        'delete',
+                                                        'Confirm Delete Rate Limit',
+                                                        'Are you sure you want to delete the rate limit for IP {{ rate_limit.ip_address }}?'
+                                                    )"
+                                                    class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                                                <i class="bi bi-trash mr-1"></i>Delete
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -98,55 +111,27 @@
 {% include 'components/confirm_modal.html' %}
 
 <script>
-function showDeleteConfirmation(ipAddress) {
-    showConfirmModal(
-        ipAddress,
-        'delete',
-        'Confirm Delete',
-        `Are you sure you want to delete the rate limit record for ${ipAddress}?`
-    );
-
-    setTimeout(() => {
-        const modal = document.getElementById('confirmModal');
-        const modalConfirm = document.getElementById('confirmAction');
-        if (!modalConfirm) {
-            console.error('Could not find confirm button');
-            return;
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmButton = document.getElementById('confirmAction');
+    const oldConfirmButton = confirmButton.cloneNode(true);
+    confirmButton.parentNode.replaceChild(oldConfirmButton, confirmButton);
+    
+    oldConfirmButton.addEventListener('click', function() {
+        if (currentAction === 'delete' && currentFormId) {
+            document.getElementById(`deleteForm-${currentFormId}`).submit();
+            hideConfirmModal();
         }
+    });
 
-        // Clone and replace the confirm button
-        const newModalConfirm = modalConfirm.cloneNode(true);
-        modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
-
-        // Update confirm button text and style
-        newModalConfirm.textContent = 'Delete';
-        newModalConfirm.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-        newModalConfirm.classList.add('bg-red-600', 'hover:bg-red-700');
-
-        // Add the click handler
-        newModalConfirm.addEventListener('click', function() {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = "{{ url_for('admin.manage_rate_limits') }}";
-            form.innerHTML = `
-                <input type="hidden" name="ip_address" value="${ipAddress}">
-                <input type="hidden" name="action" value="delete">
-            `;
-            document.body.appendChild(form);
-            form.submit();
-        });
-
-        // Add keyboard support
-        function handleKeyPress(e) {
-            if (e.key === 'Enter' && !modal.classList.contains('hidden')) {
-                e.preventDefault();
-                newModalConfirm.click();
-                document.removeEventListener('keydown', handleKeyPress);
+    // Add keyboard support for Enter key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('confirmModal').classList.contains('hidden')) {
+            if (currentAction === 'delete' && currentFormId) {
+                document.getElementById(`deleteForm-${currentFormId}`).submit();
+                hideConfirmModal();
             }
         }
-
-        document.addEventListener('keydown', handleKeyPress);
-    }, 100);
-}
+    });
+});
 </script>
 {% endblock %} 

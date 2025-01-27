@@ -35,28 +35,18 @@
                 </button>
                 <div class="hidden lg:flex lg:items-center" id="navbarNav">
                     <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 items-center">
-                        <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('main.play_game') }}">
-                            <i class="bi bi-controller mr-1"></i>Play
+                        <a href="{{ url_for('main.play_game') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                            <i class="bi bi-controller mr-1"></i>Play Game
+                        </a>
+                        <a href="{{ url_for('main.submit_review') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                            <i class="bi bi-plus-circle mr-1"></i>Submit Review
                         </a>
                         {% if session.get('logged_in') %}
                             <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin.dashboard') }}">
-                                <i class="bi bi-house-door mr-1"></i>Home
-                            </a>
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('main.submit_review') }}">
-                                <i class="bi bi-plus-circle mr-1"></i>Add Review
-                            </a>
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin.manage_reviews') }}">
-                                <i class="bi bi-gear mr-1"></i>Manage
-                            </a>
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('admin.pending_reviews') }}">
-                                <i class="bi bi-inbox mr-1"></i>Pending Reviews
+                                <i class="bi bi-gear mr-1"></i>Dashboard
                             </a>
                             <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('auth.logout') }}">
                                 <i class="bi bi-box-arrow-right mr-1"></i>Logout
-                            </a>
-                        {% else %}
-                            <a class="text-white hover:text-gray-200 hover:-translate-y-0.5 transition-all duration-300" href="{{ url_for('auth.login') }}">
-                                <i class="bi bi-person mr-1"></i>Admin
                             </a>
                         {% endif %}
                         

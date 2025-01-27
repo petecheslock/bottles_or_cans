@@ -97,9 +97,20 @@ def manage_users():
 @login_required
 def test_text_display():
     """Display actual reviews to test text container sizing"""
-    # Get all approved reviews from the database
     reviews = ReviewService.get_all_reviews()
-    return render_template('test_text_display.html', reviews=reviews)
+    
+    # Serialize reviews for JavaScript
+    serialized_reviews = [
+        {
+            'id': review.id,
+            'text': review.text,
+            'votes_headphones': review.votes_headphones,
+            'votes_wine': review.votes_wine
+        }
+        for review in reviews
+    ]
+    
+    return render_template('test_text_display.html', reviews=serialized_reviews)
 
 @admin_bp.route('/reset-votes/<int:review_id>', methods=['POST'])
 @login_required

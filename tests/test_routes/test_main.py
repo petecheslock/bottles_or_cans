@@ -107,8 +107,17 @@ class TestMainRoutes(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn(b'Review text too long', response.data)
 
-    def test_root_route(self):
-        """Test that root URL shows game page"""
+    def test_root_shows_landing_for_new_users(self):
+        """Test that root URL shows landing page for new users"""
+        response = self.client.get('/', follow_redirects=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Welcome to Bottles or Cans', response.data)
+
+    def test_root_skips_landing_for_returning_users(self):
+        """Test that root URL skips landing for users who've seen it"""
+        with self.client.session_transaction() as sess:
+            sess['seen_landing'] = True
+        
         response = self.client.get('/', follow_redirects=False)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Bottles or Cans?', response.data) 

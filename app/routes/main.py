@@ -10,11 +10,15 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 def index():
     """Landing page."""
+    # If user hasn't seen landing page and is not logged in, show it first
+    if not session.get('seen_landing') and not session.get('logged_in'):
+        return render_template('landing.html')
+        
+    # Otherwise show the game
     review = ReviewService.get_random_review()
     if review:
         headphones_percentage, wine_percentage = ReviewService.calculate_vote_percentages(review)
     else:
-        # No reviews yet
         headphones_percentage = wine_percentage = 0
         
     return render_template('index.html', 
@@ -39,6 +43,7 @@ def play_game():
 
 @bp.route('/start')
 def start_game():
+    """Mark the landing page as seen and start the game"""
     session['seen_landing'] = True
     return redirect(url_for('main.play_game'))
 

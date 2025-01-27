@@ -9,9 +9,11 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8">
                 <!-- Review Text Section - Keep original padding -->
                 <div class="p-8 border-b border-gray-200 dark:border-gray-700">
-                    {% with id_suffix = '' %}
-                        {% include 'components/review_container.html' %}
-                    {% endwith %}
+                    <div class="max-w-full mx-auto">
+                        {% with id_suffix = '' %}
+                            {% include 'components/review_container.html' %}
+                        {% endwith %}
+                    </div>
                 </div>
 
                 <!-- Voting Section - Reduced top padding -->
@@ -111,8 +113,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set both min-height and height to ensure proper sizing
     const measuredHeight = measureDiv.offsetHeight;
-    textContainer.style.minHeight = measuredHeight + 'px';
-    textContainer.style.height = measuredHeight + 'px';
+    textContainer.style.minHeight = `${measuredHeight}px`;
+
     
     // Remove the measurement div
     measureDiv.remove();

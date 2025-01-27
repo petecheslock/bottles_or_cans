@@ -1,75 +1,96 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4 mt-12">
-    <div class="max-w-2xl mx-auto space-y-8">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Text Display Test</h1>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">Testing container sizing with actual reviews from the database.</p>
+            <div class="flex justify-between items-center">
+                <button id="prevReview" class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    <i class="bi bi-arrow-left mr-2"></i>Previous
+                </button>
+                <span id="reviewCount" class="text-gray-600 dark:text-gray-400"></span>
+                <button id="nextReview" class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    Next<i class="bi bi-arrow-right ml-2"></i>
+                </button>
+            </div>
         </div>
 
-        {% for review in reviews %}
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
-            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Review #{{ review.id }}
-                </h2>
-            </div>
-            
-            <!-- Review Text Section using shared component -->
+        <!-- Review Container (matches game exactly) -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8">
             <div class="p-8 border-b border-gray-200 dark:border-gray-700">
-                {% with id_suffix = loop.index %}
-                    {% include 'components/review_container.html' %}
-                {% endwith %}
+                <div class="max-w-full mx-auto">
+                    {% with review = reviews[0], id_suffix = '' %}
+                        {% include 'components/review_container.html' %}
+                    {% endwith %}
+                </div>
             </div>
-            
-            <!-- Debug Info -->
-            <div class="p-4 bg-gray-50 dark:bg-gray-900 text-sm">
-                <p class="text-gray-600 dark:text-gray-400">
-                    Character count: {{ review.text|length }}
-                </p>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Line count: <span id="lineCount{{ loop.index }}">Calculating...</span>
-                </p>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Container height: <span id="containerHeight{{ loop.index }}">Measuring...</span>
-                </p>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Votes: 🎧 {{ review.votes_headphones }} | 🍷 {{ review.votes_wine }}
-                </p>
+
+            <!-- Debug Info (collapsible) -->
+            <div class="p-4">
+                <button onclick="toggleDebug()" class="text-blue-600 dark:text-blue-400 hover:underline">
+                    <i class="bi bi-info-circle mr-2"></i>Show Debug Info
+                </button>
+                <div id="debugInfo" class="hidden mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm">
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Character count: <span id="charCount">0</span>
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Line count: <span id="lineCount">Calculating...</span>
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Container height: <span id="containerHeight">Measuring...</span>
+                    </p>
+                </div>
             </div>
         </div>
-        {% endfor %}
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    {% for review in reviews %}
-        initializeContainer({{ loop.index }});
-    {% endfor %}
-});
+let currentReviewIndex = 0;
+const reviews = {{ reviews|tojson|safe }};
 
-function initializeContainer(index) {
-    const measureDiv = document.getElementById(`measureText${index}`);
-    const textContainer = document.getElementById(`reviewText${index}`);
+function showReview(index) {
+    const review = reviews[index];
+    const textContainer = document.getElementById('reviewText');
+    textContainer.textContent = review.text;
     
-    // Force a layout calculation
-    void measureDiv.offsetHeight;
-    
-    // Set both min-height and height to ensure proper sizing
-    const measuredHeight = measureDiv.offsetHeight;
-    textContainer.style.minHeight = measuredHeight + 'px';
-    textContainer.style.height = measuredHeight + 'px';
+    // Update review counter
+    document.getElementById('reviewCount').textContent = 
+        `Review ${index + 1} of ${reviews.length}`;
     
     // Update debug info
-    document.getElementById(`lineCount${index}`).textContent = 
-        Math.round(measuredHeight / parseInt(getComputedStyle(measureDiv).lineHeight));
-    document.getElementById(`containerHeight${index}`).textContent = 
-        `${measuredHeight}px`;
+    document.getElementById('charCount').textContent = review.text.length;
     
-    // Remove the measurement div since we don't need it anymore
-    measureDiv.remove();
+    // Use the same initialization logic as the game
+    const measureDiv = document.getElementById('measureText');
+    void measureDiv.offsetHeight;
+    const measuredHeight = measureDiv.offsetHeight;
+    textContainer.style.minHeight = `${measuredHeight}px`;
+    
+    document.getElementById('containerHeight').textContent = `${measuredHeight}px`;
+    document.getElementById('lineCount').textContent = 
+        Math.round(measuredHeight / parseInt(getComputedStyle(measureDiv).lineHeight));
 }
+
+function toggleDebug() {
+    const debugInfo = document.getElementById('debugInfo');
+    debugInfo.classList.toggle('hidden');
+}
+
+document.getElementById('prevReview').addEventListener('click', () => {
+    currentReviewIndex = (currentReviewIndex - 1 + reviews.length) % reviews.length;
+    showReview(currentReviewIndex);
+});
+
+document.getElementById('nextReview').addEventListener('click', () => {
+    currentReviewIndex = (currentReviewIndex + 1) % reviews.length;
+    showReview(currentReviewIndex);
+});
+
+// Initialize with first review
+document.addEventListener('DOMContentLoaded', () => showReview(0));
 </script>
 {% endblock %} 

@@ -1,4 +1,19 @@
-<div class="text-container text-xl italic text-gray-800 dark:text-gray-200 p-4 mb-2 bg-gray-50 dark:bg-gray-700 rounded-lg relative">
-    <div id="measureText{{ id_suffix }}" class="font-mono whitespace-pre-wrap leading-relaxed invisible absolute top-0 left-0 right-0 pt-4 px-4">{{ review.text }}</div>
-    <p id="reviewText{{ id_suffix }}" class="font-mono whitespace-pre-wrap leading-relaxed -mb-1">{{ review.text }}</p>
+<div class="text-container text-xl italic text-gray-800 dark:text-gray-200 py-2 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg relative">
+    <!-- Hidden div for measuring text -->
+    <div id="measureText{{ id_suffix }}" 
+         class="font-mono whitespace-pre-wrap break-words invisible absolute top-0 left-0 right-0 px-4
+                leading-relaxed">
+        {{ review.text if review else '' }}
+    </div>
+    
+    <!-- Actual text container -->
+    <div id="reviewText{{ id_suffix }}" 
+         class="font-mono whitespace-pre-wrap break-words leading-relaxed mx-auto
+                w-full max-w-prose">
+        {% if not review %}
+            <span class="text-gray-500 dark:text-gray-400">No review text available</span>
+        {% else %}
+            {{ review.text }}
+        {% endif %}
+    </div>
 </div> 

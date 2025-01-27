@@ -95,8 +95,27 @@ You can install the required Python packages using pip. It is recommended to use
    ```
 
 5. **Prepare the Database**
-   - You can seed the database with reviews by having a `reviews.csv` file in the same directory as the application. This file should contain the initial reviews to be imported into the database. The CSV should have the following columns: `text`, `votes_headphones`, `votes_wine`. If you don't have the file, the database will start empty and you can populate the reviews manually in the web UI.
-   - Run the database initialization script to create the necessary tables and import reviews:
+   - You can seed the database with reviews using a JSON file in the same directory as the application.
+   
+   Use this structure:
+   ```json
+   [
+     {
+       "text": "Review text here...",
+       "votes_headphones": 0,
+       "votes_wine": 0,
+       "created_at": "2025-01-25 23:01:18.767771"  // optional
+     }
+   ]
+   ```
+   
+   - The `text` field contains the review content
+   - `votes_headphones` and `votes_wine` track the number of votes for each category
+   - `created_at` is optional and will default to the current time if not provided
+   
+   If you don't provide a reviews file, the database will start empty and you can populate reviews manually through the web UI.
+   
+   Run the database initialization script to create the necessary tables and import reviews:
    ```bash
    python init_db.py
    ```

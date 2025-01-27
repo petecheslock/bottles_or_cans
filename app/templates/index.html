@@ -98,7 +98,7 @@
 </div>
 
 <script>
-{% if review %}  {# Only include the JS if we have a review #}
+{% if review %}
 document.addEventListener('DOMContentLoaded', function() {
     const reviewText = {{ review.text|tojson|safe }};
     const measureDiv = document.getElementById('measureText');
@@ -106,23 +106,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const headphonesBtn = document.getElementById('headphonesBtn');
     const wineBtn = document.getElementById('wineBtn');
     
-    // Force a layout calculation
-    void measureDiv.offsetHeight;
+    // Set initial content for measurement
+    measureDiv.textContent = reviewText;
     
-    // Set both min-height and height to ensure proper sizing
+    // Force layout calculation
+    void measureDiv.offsetHeight;
     const measuredHeight = measureDiv.offsetHeight;
     textContainer.style.minHeight = `${measuredHeight}px`;
-
     
-    // Remove the measurement div
-    measureDiv.remove();
+    // Keep measure div for responsive behavior
+    measureDiv.style.visibility = 'hidden';
     
+    // Start typing animation
     typeText(reviewText, 'reviewText', function() {
-        // Enable buttons and transition to their colors
+        // Enable buttons after animation
         headphonesBtn.disabled = false;
         wineBtn.disabled = false;
         
-        // Add transition classes first
+        // Add transition classes
         headphonesBtn.classList.add('hover:-translate-y-0.5', 'hover:bg-blue-700');
         wineBtn.classList.add('hover:-translate-y-0.5', 'hover:bg-red-700');
         
@@ -134,6 +135,13 @@ document.addEventListener('DOMContentLoaded', function() {
             wineBtn.classList.remove('bg-gray-400', 'dark:bg-gray-600');
             wineBtn.classList.add('bg-red-600', 'dark:bg-red-600');
         });
+    });
+    
+    // Add resize handler for responsive behavior
+    window.addEventListener('resize', () => {
+        void measureDiv.offsetHeight;
+        const newHeight = measureDiv.offsetHeight;
+        textContainer.style.minHeight = `${newHeight}px`;
     });
 });
 

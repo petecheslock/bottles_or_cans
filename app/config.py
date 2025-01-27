@@ -12,6 +12,10 @@ class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = 'test_secret_key'
+    WTF_CSRF_ENABLED = False
+    SERVER_NAME = 'localhost'
 
 class ProductionConfig(Config):
     """Production configuration."""

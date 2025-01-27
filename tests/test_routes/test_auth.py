@@ -1,4 +1,8 @@
 from tests.base import BaseTestCase
+from flask import url_for
+from app.services.user import UserService
+from app.models.user import User
+from io import BytesIO
 
 class TestAuthRoutes(BaseTestCase):
     def test_admin_login(self):
@@ -146,4 +150,93 @@ class TestAuthRoutes(BaseTestCase):
         self.client.get('/admin/logout')
         with self.client.session_transaction() as sess:
             self.assertFalse(sess.get('logged_in', False))
-            self.assertIsNone(sess.get('user_id')) 
+            self.assertIsNone(sess.get('user_id'))
+
+    def test_setup_page_accessible_when_no_admin(self):
+        """Test that setup page is accessible when no admin exists"""
+        # First ensure no admin exists by clearing all users
+        self.db.session.close()
+        self.db.session.query(User).delete()
+        self.db.session.commit()
+        
+        # Now try accessing the setup page
+        response = self.client.get('/admin/setup')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'First-Time Setup', response.data)
+
+    def test_setup_page_redirects_when_admin_exists(self):
+        """Test that setup page redirects when admin exists"""
+        response = self.client.get('/admin/setup')
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith('/admin/login'))
+
+    def test_successful_setup(self):
+        # Clear session and remove the default admin user
+        self.db.session.close()
+        self.db.session.query(User).delete()
+        self.db.session.commit()
+        
+        data = {
+            'username': 'admin',
+            'password': 'password123',
+            'confirm_password': 'password123'
+        }
+        response = self.client.post('/admin/setup', data=data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith('/admin/login'))
+        
+        # Verify admin was created
+        admin = UserService.get_admin_user()
+        self.assertIsNotNone(admin)
+        self.assertEqual(admin.username, 'admin')
+        self.assertTrue(admin.is_admin)
+
+    def test_setup_with_json_import(self):
+        """Test setup with JSON data import"""
+        # Clear session and remove the default admin user
+        self.db.session.close()
+        self.db.session.query(User).delete()
+        self.db.session.commit()
+        
+        test_data = [
+            {
+                "id": 1,
+                "text": "Test review text",
+                "votes_headphones": 0,
+                "votes_wine": 1,
+                "created_at": "2025-01-25 23:01:18.767771"
+            }
+        ]
+        
+        import tempfile
+        import json
+        
+        # Create temporary JSON file
+        with tempfile.NamedTemporaryFile(mode='w+', suffix='.json') as tf:
+            json.dump(test_data, tf)
+            tf.seek(0)
+            
+            # Convert the file content to bytes
+            file_content = tf.read().encode('utf-8')
+            print(f"\nFile content being sent: {file_content}")
+            
+            data = {
+                'username': 'admin',
+                'password': 'password123',
+                'confirm_password': 'password123',
+                'json_file': (BytesIO(file_content), 'test_data.json', 'application/json')
+            }
+            response = self.client.post('/admin/setup', 
+                                      data=data, 
+                                      content_type='multipart/form-data')
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith('/admin/login'))
+        
+        # Verify imported data
+        from app.models.review import Review
+        review = Review.query.first()
+        self.assertIsNotNone(review, "No review found in database after import")
+        self.assertEqual(review.text, "Test review text")
+        self.assertEqual(review.votes_wine, 1)
+        self.assertEqual(review.votes_headphones, 0) 

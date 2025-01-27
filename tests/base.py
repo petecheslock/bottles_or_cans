@@ -10,26 +10,18 @@ from app.config import TestingConfig
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(TestingConfig)
-        self.app.config.update({
-            'TESTING': True,
-            'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
-            'SQLALCHEMY_TRACK_MODIFICATIONS': False,
-            'SECRET_KEY': 'test_secret_key',
-            'WTF_CSRF_ENABLED': False
-        })
-        
         self.client = self.app.test_client()
-        with self.client.session_transaction() as sess:
-            sess['_fresh'] = True
-        
         self.app_context = self.app.app_context()
         self.app_context.push()
-        
-        db.create_all()
         self.db = db
         
-        # Create test admin user
-        self.admin = self.create_admin_user()
+        db.create_all()
+        
+        # This is what creates the admin user by default
+        self.admin = User(username='admin_test', is_admin=True)
+        self.admin.set_password('test_password')
+        db.session.add(self.admin)
+        db.session.commit()
 
     def tearDown(self):
         self.db.session.remove()

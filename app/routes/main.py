@@ -3,13 +3,20 @@ from app.services.review import ReviewService
 from app.services.captcha import CaptchaService
 from app.utils.decorators import login_required
 from app.services.rate_limit import RateLimitService
+from app.services.user import UserService
 
 bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
+    # Check if this is first-time setup
+    if not UserService.get_admin_user():
+        return redirect(url_for('auth.setup'))
+        
+    # If user hasn't seen landing page, show it first
     if not session.get('seen_landing'):
         return render_template('landing.html')
+        
     return redirect(url_for('main.play_game'))
 
 @bp.route('/play')

@@ -51,6 +51,12 @@ def vote():
         'wine_percentage': wine_percentage
     })
 
+def get_client_ip():
+    """Get client IP accounting for proxy headers"""
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    return request.remote_addr
+
 @bp.route('/submit-review', methods=['GET', 'POST'])
 def submit_review():
     """Handle submission of a new review"""
@@ -66,7 +72,7 @@ def submit_review():
         return render_template('submit_review.html', is_admin=True)
 
     # For POST requests, check rate limit first
-    ip_address = request.remote_addr
+    ip_address = get_client_ip()
     if not RateLimitService.check_rate_limit(ip_address, limit=5, window=3600):
         flash('Too many submissions. Please try again later.', 'danger')
         return render_template('submit_review.html', 
@@ -102,7 +108,7 @@ def submit_review():
         # Clear used captcha
         session.pop('captcha_text', None)
         
-        ReviewService.create_pending_review(review_text)
+        ReviewService.create_pending_review(text=review_text, ip_address=ip_address)
         return render_template('submit_thanks.html', is_admin=False)
     
     return redirect(url_for('main.submit_review'))

@@ -102,4 +102,4 @@ class ReviewService:
     @classmethod
     def get_pending_reviews(cls):
         """Get all pending reviews from the database"""
-        return PendingReview.query.filter_by(status='pending').all() 
+        return PendingReview.query.filter_by(status='pending').order_by(PendingReview.created_at.desc()).all() 

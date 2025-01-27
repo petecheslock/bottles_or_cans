@@ -127,13 +127,58 @@ You can install the required Python packages using pip. It is recommended to use
    ```
 
 ## Running the Application
-To run the application, execute the following command:
+
+### Development
+For development, set up your environment variables and run the development server:
 
 ```bash
-flask run
+export FLASK_APP=app
+export FLASK_ENV=development
+export FLASK_DEBUG=1
+python run.py
 ```
 
-The application will start on `http://127.0.0.1:5000/` by default. You can access it through your web browser.
+The application will start on `http://127.0.0.1:5000/` by default.
+
+### Production
+For production deployment, we recommend using Gunicorn. First, install it:
+
+```bash
+pip install gunicorn
+```
+
+Set up your production environment variables:
+
+```bash
+export FLASK_APP=app
+export FLASK_ENV=production
+export FLASK_DEBUG=0
+export SECRET_KEY=your-secure-secret-key
+```
+
+Initialize the DB with these variables set
+
+```bash
+python init_db.py
+```
+
+Then start the application with Gunicorn:
+
+```bash
+gunicorn -w 4 -b 0.0.0.0:5000 "run:app"
+```
+
+#### Environment Variables
+- `FLASK_APP`: Set to "app" (required)
+- `FLASK_ENV`: Set to "development" or "production"
+- `FLASK_DEBUG`: Set to 1 for development, 0 for production
+- `SECRET_KEY`: Required in production - set to a secure random string
+- `DATABASE_URL`: Optional - defaults to SQLite, set to your database URL if using a different database
+
+### Accessing the Application
+Once running, you can access the application through your web browser:
+- Development: `http://127.0.0.1:5000/`
+- Production: Depends on your server configuration and domain setup
 
 ## Admin Access
 To access the admin dashboard, login using the admin user during the database initialization.

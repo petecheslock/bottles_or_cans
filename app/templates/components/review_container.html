@@ -2,14 +2,15 @@
     <!-- Hidden div for measuring text -->
     <div id="measureText{{ id_suffix }}" 
          class="font-mono whitespace-pre-wrap break-words invisible absolute top-0 left-0 right-0 px-4
-                leading-relaxed">
+                leading-relaxed text-base sm:text-lg md:text-xl">
         {{ review.text if review else '' }}
     </div>
     
     <!-- Actual text container -->
     <div id="reviewText{{ id_suffix }}" 
          class="font-mono whitespace-pre-wrap break-words leading-relaxed mx-auto
-                w-full max-w-prose">
+                w-full max-w-prose text-base sm:text-lg md:text-xl
+                transition-all duration-300">
         {% if not review %}
             <span class="text-gray-500 dark:text-gray-400">No review text available</span>
         {% else %}

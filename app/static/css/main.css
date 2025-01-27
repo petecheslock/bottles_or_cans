@@ -887,6 +887,10 @@ video {
   cursor: not-allowed;
 }
 
+.resize {
+  resize: both;
+}
+
 .flex-col {
   flex-direction: column;
 }
@@ -1955,9 +1959,21 @@ video {
   color: rgb(252 165 165 / var(--tw-text-opacity, 1));
 }
 
+@media (min-width: 640px) {
+  .sm\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+}
+
 @media (min-width: 768px) {
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 }
 

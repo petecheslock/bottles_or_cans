@@ -90,7 +90,46 @@ document.getElementById('nextReview').addEventListener('click', () => {
     showReview(currentReviewIndex);
 });
 
-// Initialize with first review
-document.addEventListener('DOMContentLoaded', () => showReview(0));
+function updateContainerSize() {
+    const measureDiv = document.getElementById('measureText');
+    const textContainer = document.getElementById('reviewText');
+    
+    // Force layout recalculation
+    void measureDiv.offsetHeight;
+    const measuredHeight = measureDiv.offsetHeight;
+    
+    // Update container size with transition
+    textContainer.style.minHeight = `${measuredHeight}px`;
+    textContainer.style.height = `${measuredHeight}px`;
+    
+    // Update debug info if it exists
+    const containerHeight = document.getElementById('containerHeight');
+    const lineCount = document.getElementById('lineCount');
+    if (containerHeight) containerHeight.textContent = `${measuredHeight}px`;
+    if (lineCount) {
+        lineCount.textContent = 
+            Math.round(measuredHeight / parseInt(getComputedStyle(measureDiv).lineHeight));
+    }
+}
+
+// Add resize observer
+const resizeObserver = new ResizeObserver(entries => {
+    requestAnimationFrame(() => {
+        updateContainerSize();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const measureDiv = document.getElementById('measureText');
+    if (measureDiv) {
+        resizeObserver.observe(measureDiv.parentElement);
+        showReview(0);
+    }
+});
+
+// Cleanup when leaving page
+window.addEventListener('unload', () => {
+    resizeObserver.disconnect();
+});
 </script>
 {% endblock %} 

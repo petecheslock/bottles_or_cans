@@ -8,12 +8,9 @@
        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md animate__animated animate__fadeIn">
            <!-- Review Text Section - Keep original padding -->
            <div class="p-8 border-b border-gray-200 dark:border-gray-700">
-               <div class="max-w-xl mx-auto text-xl italic text-gray-800 dark:text-gray-200 p-4 mb-2 bg-gray-50 dark:bg-gray-700 rounded-lg relative">
-                   <!-- Measurement div - match styling but remove bottom padding -->
-                   <div id="measureText" class="font-mono whitespace-pre-wrap leading-relaxed invisible absolute top-0 left-0 right-0 pt-4 px-4">{{ review.text }}</div>
-                   <!-- Actual text container - add small negative margin to tighten spacing -->
-                   <p id="reviewText" class="font-mono whitespace-pre-wrap leading-relaxed -mb-1"></p>
-               </div>
+               {% with id_suffix = '' %}
+                   {% include 'components/review_container.html' %}
+               {% endwith %}
            </div>
 
            <!-- Voting Section - Reduced top padding -->

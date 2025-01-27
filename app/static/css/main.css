@@ -844,10 +844,6 @@ video {
   max-width: 24rem;
 }
 
-.max-w-xl {
-  max-width: 36rem;
-}
-
 .table-fixed {
   table-layout: fixed;
 }

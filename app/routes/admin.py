@@ -90,7 +90,7 @@ def manage_rate_limits():
 @admin_bp.route('/users')
 @login_required
 def manage_users():
-    users = User.query.all()
+    users = db.session.execute(db.select(User)).scalars().all()
     return render_template('manage_users.html', users=users)
 
 @admin_bp.route('/test-text-display')
@@ -116,7 +116,7 @@ def reset_votes(review_id):
 def reset_all_votes():
     """Reset votes for all reviews"""
     try:
-        reviews = Review.query.all()
+        reviews = db.session.execute(db.select(Review)).scalars().all()
         for review in reviews:
             review.votes_headphones = 0
             review.votes_wine = 0
@@ -129,7 +129,7 @@ def reset_all_votes():
 @login_required
 def seed_reviews():
     """Seed reviews with random votes for testing"""
-    reviews = Review.query.all()
+    reviews = db.session.execute(db.select(Review)).scalars().all()
     for review in reviews:
         review.votes_headphones = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)
         review.votes_wine = random.randint(SEED_VOTES_MIN, SEED_VOTES_MAX)

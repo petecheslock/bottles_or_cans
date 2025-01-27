@@ -1,3 +1,4 @@
+from flask import abort
 from app.models.review import Review, PendingReview
 from app.extensions import db
 import random
@@ -10,7 +11,9 @@ class ReviewService:
     @staticmethod
     def get_random_review():
         """Get a random review from the database."""
-        return Review.query.order_by(db.func.random()).first()
+        return db.session.execute(
+            db.select(Review).order_by(db.func.random()).limit(1)
+        ).scalar()
 
     @staticmethod
     def calculate_vote_percentages(review):
@@ -24,14 +27,13 @@ class ReviewService:
     @staticmethod
     def add_vote(review_id, vote_type):
         """Add a vote to a review."""
-        review = Review.query.get_or_404(review_id)
-        
-        if vote_type == 'headphones':
-            review.votes_headphones += 1
-        elif vote_type == 'wine':
-            review.votes_wine += 1
-        
-        db.session.commit()
+        review = db.session.get(Review, review_id)
+        if review:
+            if vote_type == 'headphones':
+                review.votes_headphones += 1
+            elif vote_type == 'wine':
+                review.votes_wine += 1
+            db.session.commit()
         return review
 
     @staticmethod
@@ -57,7 +59,9 @@ class ReviewService:
     @staticmethod
     def approve_pending_review(review_id):
         """Approve a pending review and create a new review."""
-        pending = PendingReview.query.get_or_404(review_id)
+        pending = db.session.get(PendingReview, review_id)
+        if not pending:
+            abort(404)
         
         review = Review(
             text=pending.text,
@@ -73,7 +77,10 @@ class ReviewService:
     @staticmethod
     def reject_pending_review(review_id):
         """Reject a pending review."""
-        review = PendingReview.query.get_or_404(review_id)
+        review = db.session.get(PendingReview, review_id)
+        if not review:
+            abort(404)
+            
         review.status = 'rejected'
         db.session.commit()
         return review
@@ -81,17 +88,17 @@ class ReviewService:
     @classmethod
     def get_all_reviews(cls):
         """Get all reviews from the database"""
-        return Review.query.all()
+        return db.session.execute(db.select(Review)).scalars().all()
 
     @staticmethod
     def get_review(review_id):
-        """Get a specific review by ID"""
-        return Review.query.get(review_id)
+        """Get a review by ID using the new SQLAlchemy 2.0 style."""
+        return db.session.get(Review, review_id)
 
     @staticmethod
     def reset_votes(review_id):
-        """Reset votes for a specific review"""
-        review = ReviewService.get_review(review_id)
+        """Reset votes for a review."""
+        review = db.session.get(Review, review_id)
         if review:
             review.votes_headphones = 0
             review.votes_wine = 0

@@ -191,7 +191,7 @@ function handleResetVotes() {
     });
 }
 
-function handleSeedVotes() {
+function handleSeedAction() {
     const modalMessage = document.getElementById('modalMessage');
     const modalFooter = document.querySelector('#confirmModal .flex.justify-end');
     const originalButtons = modalFooter.innerHTML;
@@ -214,12 +214,11 @@ function handleSeedVotes() {
     `;
 
     const startTime = Date.now();
-    const minimumLoadingTime = 2000;
+    const minimumLoadingTime = 2000; // 2 seconds minimum loading time
 
-    fetch('{{ url_for("admin.seed_reviews") }}', {
+    fetch('/admin/seed-reviews', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
@@ -278,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentAction === 'reset') {
             handleResetVotes();
         } else if (currentAction === 'seed') {
-            handleSeedVotes();
+            handleSeedAction();
         } else if (currentAction === 'delete' && currentFormId) {
             document.getElementById(`deleteForm-${currentFormId}`).submit();
             hideConfirmModal();
@@ -291,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentAction === 'reset') {
                 handleResetVotes();
             } else if (currentAction === 'seed') {
-                handleSeedVotes();
+                handleSeedAction();
             } else if (currentAction === 'delete' && currentFormId) {
                 document.getElementById(`deleteForm-${currentFormId}`).submit();
                 hideConfirmModal();

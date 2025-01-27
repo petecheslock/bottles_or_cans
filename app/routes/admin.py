@@ -139,5 +139,10 @@ def seed_reviews():
         review.votes_wine = random.randint(0, 100)
     
     db.session.commit()
+
+    # Check if it's an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True})
+    
     flash('Reviews seeded successfully!', 'success')
     return redirect(url_for('admin.manage_reviews')) 

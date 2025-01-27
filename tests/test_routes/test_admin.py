@@ -112,4 +112,24 @@ class TestAdminRoutes(BaseTestCase):
         
         # Verify votes were seeded
         updated_review = self.db.session.get(Review, review.id)
+        self.assertNotEqual(updated_review.votes_headphones, initial_votes)
+
+    def test_seed_reviews_ajax(self):
+        """Test seeding reviews via AJAX request"""
+        self.login_admin()
+        
+        # Create a test review
+        review = self.create_test_review()
+        initial_votes = review.votes_headphones
+        
+        # Test AJAX request
+        response = self.client.post('/admin/seed-reviews', 
+                                  headers={'X-Requested-With': 'XMLHttpRequest'})
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.is_json)  # Verify JSON response
+        self.assertTrue(response.json['success'])
+        
+        # Verify votes were updated
+        updated_review = self.db.session.get(Review, review.id)
         self.assertNotEqual(updated_review.votes_headphones, initial_votes) 

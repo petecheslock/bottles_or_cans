@@ -160,23 +160,23 @@ function submitVote(voteType) {
     .then(response => response.json())
     .then(data => {
         setTimeout(() => {
+            // Hide buttons and show results immediately
             voteButtons.style.display = 'none';
             voteResults.style.display = 'block';
             voteResults.classList.add('animate__animated', 'animate__fadeIn');
             
-            setTimeout(() => {
-                const headphonesBar = voteResults.querySelector('.bg-blue-600.dark\\:bg-blue-500');
-                const wineBar = voteResults.querySelector('.bg-red-600.dark\\:bg-red-500');
-                const headphonesPercentage = voteResults.querySelector('.headphones-percentage');
-                const winePercentage = voteResults.querySelector('.wine-percentage');
-                
-                headphonesBar.style.width = `${data.headphones_percentage}%`;
-                headphonesPercentage.textContent = `${data.headphones_percentage}%`;
-                
-                wineBar.style.width = `${data.wine_percentage}%`;
-                winePercentage.textContent = `${data.wine_percentage}%`;
-            }, 100);
-        }, 500);
+            // Update percentages immediately
+            const headphonesBar = voteResults.querySelector('.bg-blue-600.dark\\:bg-blue-500');
+            const wineBar = voteResults.querySelector('.bg-red-600.dark\\:bg-red-500');
+            const headphonesPercentage = voteResults.querySelector('.headphones-percentage');
+            const winePercentage = voteResults.querySelector('.wine-percentage');
+            
+            headphonesBar.style.width = `${data.headphones_percentage}%`;
+            headphonesPercentage.textContent = `${data.headphones_percentage}%`;
+            
+            wineBar.style.width = `${data.wine_percentage}%`;
+            winePercentage.textContent = `${data.wine_percentage}%`;
+        }, 100);
     });
 }
 {% endif %}

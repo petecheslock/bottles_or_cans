@@ -10,10 +10,11 @@ class ReviewService:
     VARIANCE = 10    # Maximum deviation from base votes
 
     @staticmethod
-    def get_random_review():
+    def get_random_review(voted_reviews=None):
         """Get a random review, prioritizing ones the user hasn't voted on yet"""
-        # Get voted reviews from session
-        voted_reviews = session.get('voted_reviews', [])
+        # Get voted reviews from session if not provided
+        if voted_reviews is None:
+            voted_reviews = session.get('voted_reviews', [])
         
         # First try to get a review that hasn't been voted on
         unvoted_review = Review.query.filter(

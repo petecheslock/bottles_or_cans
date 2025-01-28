@@ -9,8 +9,9 @@ class TestReviewService(BaseTestCase):
         self.assertEqual(review.text, 'Test service review')
         
     def test_get_random_review(self):
+        """Test getting a random review"""
         self.create_test_review()
-        random_review = ReviewService.get_random_review()
+        random_review = ReviewService.get_random_review(voted_reviews=[])
         self.assertIsNotNone(random_review)
         
     def test_vote_percentages(self):

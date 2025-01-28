@@ -63,6 +63,36 @@ You can install the required Python packages using pip. It is recommended to use
 - Configurable voting thresholds
 - Adjustable moderation settings
 
+### Demos and Screenshots
+
+No matter how long or short the review is, the text container that holds it will always be the correct size before the text fills it.
+
+![](docs/screenshots/dynamic-review-text-box.gif)
+
+Dynamically resizing the text window and the text size when the browser window is resized.
+
+![](docs/screenshots/response-review-text-box.gif)
+
+Users can submit their own reviws, see how many characters they are towards a configurable limit, protected with a captcha.
+
+![](docs/screenshots/submit-review-user.webp)
+
+Admins use the same endpoint without the captcha or rate limiting
+
+![](docs/screenshots/admin-submit-review.webp)
+
+User submissions are rate limited to protect against abuse.
+
+![](docs/screenshots/rate-limit-management.webp)
+
+Reviews submitted by users live in a pending review state saving their IP waiting for review.
+
+![](docs/screenshots/pending-review-management.webp)
+
+Review management dashboard, with ability to seed vote counts, reset vote counts, and edit/delete reviews
+
+![](docs/screenshots/manage-reviews-seed-votes.webp)
+
 ## Setup Instructions
 
 1. **Clone the Repository**

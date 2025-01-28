@@ -2,6 +2,8 @@ from flask import abort
 from app.models.review import Review, PendingReview
 from app.extensions import db
 import random
+from flask import session
+from sqlalchemy import func
 
 class ReviewService:
     VIRTUAL_VOTES = 10
@@ -10,17 +12,41 @@ class ReviewService:
 
     @staticmethod
     def get_random_review():
-        """Get a random review from the database."""
-        return db.session.execute(
-            db.select(Review).order_by(db.func.random()).limit(1)
-        ).scalar()
+        """Get a random review, prioritizing ones the user hasn't voted on yet"""
+        # Get voted reviews from session
+        voted_reviews = session.get('voted_reviews', [])
+        
+        # First try to get a review that hasn't been voted on
+        unvoted_review = Review.query.filter(
+            ~Review.id.in_(voted_reviews)
+        ).order_by(func.random()).first()
+        
+        if unvoted_review:
+            return unvoted_review
+        
+        # If all reviews have been voted on, return any random review
+        return Review.query.order_by(func.random()).first()
 
     @staticmethod
     def calculate_vote_percentages(review):
-        """Calculate vote percentages for a review."""
+        """Calculate vote percentages for a review, ensuring they total 100%."""
         total_votes = review.votes_headphones + review.votes_wine + (ReviewService.VIRTUAL_VOTES * 2)
-        headphones_percentage = int(((review.votes_headphones + ReviewService.VIRTUAL_VOTES) / total_votes) * 100)
-        wine_percentage = int(((review.votes_wine + ReviewService.VIRTUAL_VOTES) / total_votes) * 100)
+        
+        # Calculate raw percentages first (as floats)
+        headphones_raw = ((review.votes_headphones + ReviewService.VIRTUAL_VOTES) / total_votes) * 100
+        wine_raw = ((review.votes_wine + ReviewService.VIRTUAL_VOTES) / total_votes) * 100
+        
+        # Round down both numbers initially
+        headphones_percentage = int(headphones_raw)
+        wine_percentage = int(wine_raw)
+        
+        # Calculate the remainder and add it to the larger percentage
+        remainder = 100 - (headphones_percentage + wine_percentage)
+        if remainder > 0:
+            if headphones_raw - headphones_percentage >= wine_raw - wine_percentage:
+                headphones_percentage += remainder
+            else:
+                wine_percentage += remainder
         
         return headphones_percentage, wine_percentage
 

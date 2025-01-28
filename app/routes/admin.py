@@ -36,9 +36,30 @@ def delete_review(review_id):
 def edit_review(review_id):
     if request.method == 'POST':
         text = request.form.get('review_text')
-        ReviewService.update_review(review_id, text)
-        flash('Review updated successfully!', 'success')
-        return redirect(url_for('admin.manage_reviews'))
+        try:
+            votes_headphones = int(request.form.get('votes_headphones', 0))
+            votes_wine = int(request.form.get('votes_wine', 0))
+            
+            # Validate vote counts
+            if votes_headphones < 0 or votes_wine < 0:
+                flash('Vote counts cannot be negative', 'error')
+                review = ReviewService.get_review(review_id)
+                return render_template('edit_review.html', review=review)
+            
+            # Update the review with new text and vote counts
+            ReviewService.update_review(
+                review_id, 
+                text, 
+                votes_headphones=votes_headphones,
+                votes_wine=votes_wine
+            )
+            
+            flash('Review updated successfully!', 'success')
+            return redirect(url_for('admin.manage_reviews'))
+        except ValueError:
+            flash('Invalid vote counts provided', 'error')
+            review = ReviewService.get_review(review_id)
+            return render_template('edit_review.html', review=review)
     
     review = ReviewService.get_review(review_id)
     return render_template('edit_review.html', review=review)

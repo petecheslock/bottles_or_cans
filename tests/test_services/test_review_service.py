@@ -136,4 +136,47 @@ class TestReviewService(BaseTestCase):
         
         # Try resetting non-existent review
         success = ReviewService.reset_votes(999)
-        self.assertFalse(success) 
+        self.assertFalse(success)
+
+    def test_update_review_with_vote_counts(self):
+        """Test updating a review with new vote counts"""
+        review = self.create_test_review()
+        initial_text = review.text
+        
+        # Update only vote counts
+        success = ReviewService.update_review(
+            review.id,
+            initial_text,
+            votes_headphones=75,
+            votes_wine=25
+        )
+        
+        self.assertTrue(success)
+        self.assertEqual(review.votes_headphones, 75)
+        self.assertEqual(review.votes_wine, 25)
+        self.assertEqual(review.text, initial_text)  # Text should remain unchanged
+        
+        # Update both text and vote counts
+        new_text = "Updated review text"
+        success = ReviewService.update_review(
+            review.id,
+            new_text,
+            votes_headphones=30,
+            votes_wine=70
+        )
+        
+        self.assertTrue(success)
+        self.assertEqual(review.text, new_text)
+        self.assertEqual(review.votes_headphones, 30)
+        self.assertEqual(review.votes_wine, 70)
+
+    def test_update_review_invalid_id(self):
+        """Test updating a non-existent review"""
+        result = ReviewService.update_review(
+            999,
+            "Test text",
+            votes_headphones=50,
+            votes_wine=50
+        )
+        
+        self.assertIsNone(result) 

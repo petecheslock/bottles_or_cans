@@ -170,14 +170,22 @@ class ReviewService:
         return PendingReview.query.filter_by(status='pending').order_by(PendingReview.created_at.desc()).all()
 
     @staticmethod
-    def update_review(review_id, text):
-        """Update a review's text."""
+    def update_review(review_id, text, votes_headphones=None, votes_wine=None):
+        """Update a review's text and optionally its vote counts."""
         review = db.session.get(Review, review_id)
-        if review:
-            review.text = text
-            db.session.commit()
-            return review
-        return None
+        if not review:
+            return None
+        
+        review.text = text
+        
+        # Update vote counts if provided
+        if votes_headphones is not None:
+            review.votes_headphones = votes_headphones
+        if votes_wine is not None:
+            review.votes_wine = votes_wine
+        
+        db.session.commit()
+        return review
 
     @staticmethod
     def delete_review(review_id):

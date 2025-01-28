@@ -57,6 +57,67 @@ class TestAdminRoutes(BaseTestCase):
         updated_review = self.db.session.get(Review, review.id)
         self.assertEqual(updated_review.text, new_text)
 
+    def test_edit_review_with_vote_counts(self):
+        """Test editing a review's text and vote counts"""
+        review = self.create_test_review()
+        initial_votes_headphones = review.votes_headphones
+        initial_votes_wine = review.votes_wine
+        
+        # Test GET request shows current vote counts
+        response = self.client.get(f'/admin/edit-review/{review.id}')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(str(initial_votes_headphones).encode(), response.data)
+        self.assertIn(str(initial_votes_wine).encode(), response.data)
+        
+        # Test POST request with updated vote counts
+        new_text = 'Updated review text'
+        new_votes_headphones = 42
+        new_votes_wine = 58
+        
+        response = self.client.post(
+            f'/admin/edit-review/{review.id}',
+            data={
+                'review_text': new_text,
+                'votes_headphones': new_votes_headphones,
+                'votes_wine': new_votes_wine
+            },
+            follow_redirects=True
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Review updated successfully', response.data)
+        
+        # Verify the review was actually updated
+        updated_review = self.db.session.get(Review, review.id)
+        self.assertEqual(updated_review.text, new_text)
+        self.assertEqual(updated_review.votes_headphones, new_votes_headphones)
+        self.assertEqual(updated_review.votes_wine, new_votes_wine)
+
+    def test_edit_review_vote_counts_validation(self):
+        """Test validation of vote count inputs"""
+        review = self.create_test_review()
+        initial_votes_headphones = review.votes_headphones
+        initial_votes_wine = review.votes_wine
+        
+        # Test negative vote counts
+        response = self.client.post(
+            f'/admin/edit-review/{review.id}',
+            data={
+                'review_text': 'Test text',
+                'votes_headphones': -5,
+                'votes_wine': -10
+            },
+            follow_redirects=True
+        )
+        
+        # Check for error message
+        self.assertIn(b'Vote counts cannot be negative', response.data)
+        
+        # Verify votes were not updated
+        updated_review = self.db.session.get(Review, review.id)
+        self.assertEqual(updated_review.votes_headphones, initial_votes_headphones)
+        self.assertEqual(updated_review.votes_wine, initial_votes_wine)
+
     def test_rate_limits_management(self):
         # Create some rate limits
         rate_limit = self.create_rate_limit('192.168.1.1', 1)

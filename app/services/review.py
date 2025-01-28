@@ -6,7 +6,6 @@ from flask import session
 from sqlalchemy import func
 
 class ReviewService:
-    VIRTUAL_VOTES = 10
     BASE_VOTES = 50  # Base number of votes to start with
     VARIANCE = 10    # Maximum deviation from base votes
 
@@ -30,19 +29,32 @@ class ReviewService:
     @staticmethod
     def calculate_vote_percentages(review):
         """Calculate vote percentages for a review, ensuring they total 100%."""
-        total_votes = review.votes_headphones + review.votes_wine + (ReviewService.VIRTUAL_VOTES * 2)
+        # Get total number of actual votes
+        total_votes = review.votes_headphones + review.votes_wine
         
-        # Calculate raw percentages first (as floats)
-        headphones_raw = ((review.votes_headphones + ReviewService.VIRTUAL_VOTES) / total_votes) * 100
-        wine_raw = ((review.votes_wine + ReviewService.VIRTUAL_VOTES) / total_votes) * 100
+        # Handle case with no votes
+        if total_votes == 0:
+            return 0, 0
         
-        # Round down both numbers initially
+        # Calculate percentages as floating point numbers
+        # e.g., if headphones=3, wine=7, total=10:
+        # headphones_raw = (3/10) * 100 = 30.0
+        # wine_raw = (7/10) * 100 = 70.0
+        headphones_raw = (review.votes_headphones / total_votes) * 100
+        wine_raw = (review.votes_wine / total_votes) * 100
+        
+        # Convert to integers by truncating decimal points
+        # e.g., headphones_percentage = int(30.0) = 30
+        # wine_percentage = int(70.0) = 70
         headphones_percentage = int(headphones_raw)
         wine_percentage = int(wine_raw)
         
-        # Calculate the remainder and add it to the larger percentage
+        # Handle rounding to ensure percentages total exactly 100%
+        # e.g., if raw values were 33.33% and 66.66%:
+        # integers would be 33 + 66 = 99, leaving remainder of 1
         remainder = 100 - (headphones_percentage + wine_percentage)
         if remainder > 0:
+            # Add remainder to whichever raw value had more decimal points
             if headphones_raw - headphones_percentage >= wine_raw - wine_percentage:
                 headphones_percentage += remainder
             else:

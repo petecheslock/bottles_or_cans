@@ -105,8 +105,9 @@ def submit_review():
             flash('Review text too long', 'error')
             return render_template('submit_review.html', is_admin=is_admin), 400
 
-        # Check rate limit
-        if not is_admin and not RateLimitService.check_rate_limit(request.remote_addr):
+        # Check rate limit using client IP from X-Forwarded-For
+        client_ip = get_client_ip()
+        if not is_admin and not RateLimitService.check_rate_limit(client_ip):
             if is_ajax:
                 return jsonify({'success': False, 'error': 'Too many submissions. Please try again later.'}), 429
             flash('Too many submissions. Please try again later.', 'error')
@@ -133,7 +134,8 @@ def submit_review():
                 flash('Invalid captcha. Please try again.', 'error')
                 return redirect(url_for('main.submit_review'))
             
-            ReviewService.create_pending_review(text, request.remote_addr)
+            # Use client IP from X-Forwarded-For for pending review
+            ReviewService.create_pending_review(text, client_ip)
             if is_ajax:
                 return jsonify({
                     'success': True,

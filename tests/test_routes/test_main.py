@@ -1,4 +1,3 @@
-from unittest.mock import patch
 from tests.base import BaseTestCase
 import json
 from app.models.review import Review
@@ -36,19 +35,21 @@ class TestMainRoutes(BaseTestCase):
         updated_review = self.db.session.get(Review, review.id)
         self.assertEqual(updated_review.votes_headphones, 11)  # 10 + 1
 
-    @patch('app.services.captcha.CaptchaService.generate_captcha')
-    @patch('app.services.captcha.CaptchaService.verify_captcha')
-    def test_submit_review(self, mock_verify_captcha, mock_generate_captcha):
-        # Mock the captcha generation and verification
-        mock_generate_captcha.return_value = ('dummy_image_data', 'DUMMY')
-        mock_verify_captcha.return_value = True
+    def test_submit_review(self):
+        """Test review submission with captcha"""
+        # Get the captcha first
+        response = self.client.get('/captcha')
+        self.assertEqual(response.status_code, 200)
         
-        # Test submitting review as non-admin
+        # Submit the review with captcha
         response = self.client.post('/submit-review', data={
             'review_text': 'New test review',
-            'captcha_answer': 'DUMMY'
+            'captcha_answer': response.json['answer']
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
+        # For non-admin users, we expect to see the thank you message
+        self.assertIn(b'Thank You for Your Submission', response.data)
+        self.assertIn(b'Your review has been submitted and will be reviewed by an admin', response.data)
 
     def test_start_game(self):
         # Create a test review first
@@ -60,6 +61,7 @@ class TestMainRoutes(BaseTestCase):
             self.assertTrue(sess.get('seen_landing'))
 
     def test_submit_review_as_admin(self):
+        """Test review submission as admin"""
         # Login as admin first
         self.login_admin()
         

@@ -1,6 +1,6 @@
 from tests.base import BaseTestCase
 from app.services.rate_limit import RateLimitService
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from sqlalchemy import select
 from app.models.rate_limit import RateLimit
 from app.extensions import db
@@ -24,7 +24,7 @@ class TestRateLimitService(BaseTestCase):
     def test_cleanup_old_records(self):
         # Create some old rate limits
         old_rate_limit = self.create_rate_limit('10.0.0.1', 1)
-        old_rate_limit.last_request = datetime.utcnow() - timedelta(hours=2)
+        old_rate_limit.last_request = datetime.now(UTC) - timedelta(hours=2)
         old_rate_limit_id = old_rate_limit.id
         self.db.session.commit()
         
@@ -33,7 +33,7 @@ class TestRateLimitService(BaseTestCase):
         recent_rate_limit_id = recent_rate_limit.id
         self.db.session.commit()
         
-        RateLimitService._cleanup_old_records()
+        RateLimitService.cleanup_old_entries()
         
         # Clear the session entirely to ensure fresh data
         self.db.session.close()

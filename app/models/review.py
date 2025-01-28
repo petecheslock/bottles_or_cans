@@ -1,5 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from app.extensions import db
+from sqlalchemy.sql import func
 
 class Review(db.Model):
     """Model for storing reviews and their votes."""
@@ -9,7 +10,11 @@ class Review(db.Model):
     text = db.Column(db.Text, nullable=False)
     votes_headphones = db.Column(db.Integer, default=0)
     votes_wine = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
     is_active = db.Column(db.Boolean, default=True)
 
     @property
@@ -53,7 +58,11 @@ class PendingReview(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
     ip_address = db.Column(db.String(45), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
     status = db.Column(db.String(20), default='pending')
 
     def __repr__(self):

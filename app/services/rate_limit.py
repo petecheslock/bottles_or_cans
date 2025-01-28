@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from app.models.rate_limit import RateLimit
 from app.extensions import db
 
@@ -9,42 +9,40 @@ class RateLimitService:
         return RateLimit.query.all()
 
     @staticmethod
+    def create_rate_limit(ip_address):
+        """Create a new rate limit record"""
+        rate_limit = RateLimit(
+            ip_address=ip_address,
+            count=1,
+            last_request=datetime.now(UTC)
+        )
+        db.session.add(rate_limit)
+        db.session.commit()
+        return rate_limit
+
+    @staticmethod
     def check_rate_limit(ip_address, limit=5, window=3600):
         """Check if an IP has exceeded the rate limit"""
-        # Clean up old records
-        RateLimitService._cleanup_old_records(window)
+        # Clean up old entries first
+        window_start = datetime.now(UTC) - timedelta(seconds=window)
+        RateLimitService.cleanup_old_entries(window_start)
         
-        # Get current count for IP
-        rate_limit = RateLimit.query.filter_by(ip_address=ip_address).first()
+        rate_limit = db.session.execute(
+            db.select(RateLimit).filter_by(ip_address=ip_address)
+        ).scalar()
         
-        if not rate_limit:
-            # Create new record if IP not found
-            rate_limit = RateLimit(
-                ip_address=ip_address, 
-                count=1,
-                last_request=datetime.utcnow()
-            )
-            db.session.add(rate_limit)
-        else:
-            # Update existing record
-            if rate_limit.is_blocked:
-                return False
-            
-            # Check if window has expired
-            window_start = datetime.utcnow() - timedelta(seconds=window)
-            if rate_limit.last_request < window_start:
-                rate_limit.count = 1
-            else:
-                rate_limit.count += 1
-            
-            rate_limit.last_request = datetime.utcnow()
-            
-            # Check if limit exceeded
-            if rate_limit.count > limit:
+        if rate_limit:
+            rate_limit.count += 1
+            rate_limit.last_request = datetime.now(UTC)
+            if rate_limit.count >= limit:
                 rate_limit.is_blocked = True
+                db.session.commit()
+                return False
+        else:
+            rate_limit = RateLimitService.create_rate_limit(ip_address)
             
         db.session.commit()
-        return rate_limit.count <= limit
+        return True
 
     @staticmethod
     def block_ip(ip_address):
@@ -67,13 +65,14 @@ class RateLimitService:
             db.session.commit()
 
     @staticmethod
-    def _cleanup_old_records(window=3600):
-        """Remove rate limit records older than the window"""
-        cutoff = datetime.utcnow() - timedelta(seconds=window)
-        RateLimit.query.filter(
-            RateLimit.last_request < cutoff,
-            RateLimit.is_blocked == False  # Keep blocked IPs
-        ).delete()
+    def cleanup_old_entries(cutoff=None):
+        """Remove rate limit entries older than cutoff"""
+        if cutoff is None:
+            cutoff = datetime.now(UTC) - timedelta(seconds=3600)
+        
+        db.session.execute(
+            db.delete(RateLimit).where(RateLimit.last_request < cutoff)
+        )
         db.session.commit()
 
     @staticmethod

@@ -137,13 +137,14 @@ def submit_review():
             if is_ajax:
                 return jsonify({
                     'success': True,
-                    'redirect_url': url_for('main.thank_you')  # Changed endpoint name
+                    'redirect_url': url_for('main.thank_you')
                 })
-            return redirect(url_for('main.thank_you'))  # Changed endpoint name
+            return redirect(url_for('main.thank_you'))
 
     # GET request - show the form
     if not is_admin:
-        captcha_image, answer = CaptchaService.generate_captcha()
+        captcha_service = CaptchaService()
+        captcha_image, answer = captcha_service.generate_captcha()
         session['captcha_answer'] = answer
     else:
         captcha_image = None
@@ -152,7 +153,7 @@ def submit_review():
                          is_admin=is_admin,
                          captcha_image=captcha_image)
 
-@bp.route('/thank-you')  # Add this new route
+@bp.route('/thank-you')
 def thank_you():
     """Thank you page after submitting a review."""
     return render_template('submit_thanks.html', is_admin=False)
@@ -160,8 +161,16 @@ def thank_you():
 @bp.route('/refresh-captcha', methods=['POST'])
 def refresh_captcha():
     """Generate a new captcha image"""
-    if not session.get('logged_in'):  # Only for non-admin users
-        captcha_image, captcha_text = CaptchaService.generate_captcha()
+    if not session.get('logged_in'):
+        captcha_service = CaptchaService()
+        captcha_image, captcha_text = captcha_service.generate_captcha()
         session['captcha_answer'] = captcha_text
         return jsonify({'captcha_image': captcha_image})
-    return jsonify({'error': 'Unauthorized'}), 401 
+    return jsonify({'error': 'Unauthorized'}), 401
+
+@bp.route('/captcha')
+def get_captcha():
+    captcha_service = CaptchaService()
+    image_data, answer = captcha_service.generate_captcha()
+    session['captcha_answer'] = answer
+    return jsonify({'image': image_data, 'answer': answer}) 

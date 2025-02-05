@@ -19,6 +19,15 @@ class Config:
     
     GA_MEASUREMENT_ID = os.environ.get('GA_MEASUREMENT_ID', '')
     
+    # Default SQLite database path
+    DEFAULT_DB_PATH = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 
+                                 'instance', 'bottles_or_cans.db')
+    
+    @classmethod
+    def get_database_url(cls):
+        """Get database URL with fallback to SQLite"""
+        return os.getenv('DATABASE_URL', f'sqlite:///{cls.DEFAULT_DB_PATH}')
+    
     @classmethod
     def validate_config(cls):
         """Validate configuration settings"""
@@ -31,7 +40,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///dev.db')
+    SQLALCHEMY_DATABASE_URI = Config.get_database_url()
 
 class TestingConfig(Config):
     """Testing configuration."""
@@ -45,7 +54,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Production configuration."""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///bottles_or_cans.db')
+    SQLALCHEMY_DATABASE_URI = Config.get_database_url()
     
     @classmethod
     def validate_config(cls):

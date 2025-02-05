@@ -80,9 +80,8 @@ class UserService:
                         text=review_data['text'],
                         votes_headphones=review_data.get('votes_headphones', 0),
                         votes_wine=review_data.get('votes_wine', 0),
-                        created_at=datetime.strptime(
-                            review_data['created_at'], 
-                            '%Y-%m-%d %H:%M:%S.%f'
+                        created_at=datetime.fromisoformat(
+                            review_data['created_at']
                         ) if review_data.get('created_at') else datetime.utcnow()
                     )
                     db.session.add(review)

@@ -8,7 +8,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 
 def init_admin_user(app):
-    """Initialize admin user if it doesn't exist"""
+    """Initialize admin user and import initial data if needed"""
     # Skip admin creation if configured (for testing)
     if app.config.get('SKIP_ADMIN_CREATION'):
         return
@@ -41,6 +41,22 @@ def init_admin_user(app):
                 db.session.add(admin)
                 db.session.commit()
                 app.logger.info(f"Created admin user: {app.config['ADMIN_USERNAME']}")
+                
+                # After creating admin, check for initial data file
+                import os
+                import json
+                from app.services.user import UserService
+                
+                reviews_file = os.path.join(app.root_path, '..', 'reviews_export.json')
+                if os.path.exists(reviews_file):
+                    try:
+                        with open(reviews_file, 'r') as f:
+                            data = json.load(f)
+                            UserService.import_initial_data(data)
+                            app.logger.info("Imported initial reviews from reviews_export.json")
+                    except Exception as e:
+                        app.logger.error(f"Failed to import initial reviews: {str(e)}")
+                
             except Exception as e:
                 app.logger.error(f"Failed to create admin user: {str(e)}")
                 sys.exit(1)
